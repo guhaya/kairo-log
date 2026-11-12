@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0e1116">
+<meta name="robots" content="noindex, nofollow">
+<title>KAIRO · Workout log</title>
+<style>
+  :root {
+    --bg: #0e1116;
+    --surface: #171c24;
+    --card: #1d2430;
+    --card-2: #232b39;
+    --text: #eef1f6;
+    --muted: #8b95a8;
+    --faint: #5c6678;
+    --accent: #3dbe9a;
+    --accent-dim: #1f6f5c;
+    --accent-bg: #15352e;
+    --warn: #e6b84d;
+    --danger: #e85d5d;
+    --line: #2a3340;
+    --input: #10141b;
+    --safe-t: env(safe-area-inset-top, 0px);
+    --safe-b: env(safe-area-inset-bottom, 0px);
+    --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: var(--font); }
+  body { min-height: 100dvh; min-height: 100vh; }
+  button, input, textarea, select { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  input, textarea, select { font-size: 16px; } /* prevent iOS zoom */
+  .wrap { max-width: 520px; margin: 0 auto; padding: calc(16px + var(--safe-t)) 16px calc(120px + var(--safe-b)); }
+
+  /* Unlock */
+  #unlock {
+    min-height: 100dvh; min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 32px 24px calc(40px + var(--safe-b));
+    max-width: 420px; margin: 0 auto;
+  }
+  #unlock h1 { font-size: 13px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin: 0 0 8px; font-weight: 700; }
+  #unlock h2 { font-size: 28px; margin: 0 0 8px; font-weight: 650; letter-spacing: -0.03em; }
+  #unlock p { color: var(--muted); margin: 0 0 28px; line-height: 1.45; }
+  #unlock .row { display: flex; gap: 10px; }
+  #passcode {
+    flex: 1; background: var(--input); border: 1px solid var(--line); border-radius: 14px;
+    padding: 16px 16px; outline: none; letter-spacing: 0.12em;
+  }
+  #passcode:focus { border-color: var(--accent); }
+  #unlock-btn, #save-btn, .btn-primary {
+    background: var(--accent); color: #06221b; font-weight: 700; border: 0;
+    border-radius: 14px; padding: 16px 20px; min-height: 52px;
+  }
+  #unlock-btn:active, #save-btn:active { transform: scale(0.98); }
+  .err { color: var(--danger); font-size: 14px; margin-top: 12px; min-height: 1.3em; }
+
+  /* Header */
+  header.app {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 18px;
+  }
+  header.app .brand { font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+  header.app .sub { color: var(--muted); font-size: 13px; }
+  header.app button.link { background: none; border: 0; color: var(--muted); font-size: 13px; padding: 8px 0; }
+
+  /* Session picker */
+  .seg {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px;
+  }
+  .seg button {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+    padding: 12px 8px; font-weight: 650; position: relative; min-height: 52px;
+  }
+  .seg button.on { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); }
+  .seg button .chip {
+    display: none; position: absolute; top: -8px; right: 6px;
+    background: var(--accent); color: #06221b; font-size: 10px; font-weight: 800;
+    letter-spacing: 0.04em; text-transform: uppercase; border-radius: 999px; padding: 2px 6px;
+  }
+  .seg button.suggested .chip { display: inline; }
+
+  .meta {
+    display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end;
+    margin-bottom: 8px;
+  }
+  .field label { display: block; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
+  .field input[type="date"] {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+    padding: 12px 12px; width: 100%; color-scheme: dark;
+  }
+  .hint { color: var(--muted); font-size: 13px; margin: 0 0 18px; line-height: 1.4; }
+  .hint strong { color: var(--text); font-weight: 600; }
+
+  /* Exercise cards */
+  .ex {
+    background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+    padding: 14px 14px 12px; margin-bottom: 12px;
+  }
+  .ex-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 4px; }
+  .ex-name { font-weight: 650; font-size: 15.5px; line-height: 1.3; letter-spacing: -0.01em; }
+  .ex-meta { color: var(--muted); font-size: 12.5px; margin-bottom: 10px; }
+  .ex-meta .tgt { color: var(--accent); font-weight: 600; }
+  .set {
+    display: grid; grid-template-columns: 48px 1fr 16px 1fr; gap: 8px; align-items: center;
+    margin-bottom: 8px;
+  }
+  .set .n { color: var(--faint); font-size: 12px; font-weight: 700; letter-spacing: 0.06em; }
+  .set .inp {
+    display: flex; align-items: center; background: var(--input); border: 1px solid var(--line);
+    border-radius: 10px; padding: 0 10px; min-height: 46px;
+  }
+  .set .inp input {
+    flex: 1; background: transparent; border: 0; outline: none; width: 100%;
+    min-width: 0; padding: 10px 0; font-variant-numeric: tabular-nums; font-weight: 600;
+  }
+  .set .inp span { color: var(--faint); font-size: 11px; font-weight: 700; margin-left: 4px; letter-spacing: 0.04em; }
+  .set .times { color: var(--faint); text-align: center; font-weight: 700; }
+  .ex-notes {
+    width: 100%; background: var(--input); border: 1px solid var(--line); border-radius: 10px;
+    padding: 10px 12px; resize: none; min-height: 40px; margin-top: 4px;
+  }
+
+  /* Energy / notes */
+  .block { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px; margin: 16px 0; }
+  .block h3 { margin: 0 0 12px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  .slider-row { display: grid; grid-template-columns: 88px 1fr 36px; gap: 10px; align-items: center; margin-bottom: 10px; }
+  .slider-row label { font-size: 14px; }
+  .slider-row input[type="range"] { width: 100%; accent-color: var(--accent); }
+  .slider-row .val { font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; color: var(--accent); }
+  .slider-row input[type="range"].empty + .val, .val.off { color: var(--faint); }
+  #session-notes {
+    width: 100%; background: var(--input); border: 1px solid var(--line); border-radius: 10px;
+    padding: 12px; min-height: 72px; resize: vertical;
+  }
+
+  /* Sticky save */
+  .dock {
+    position: fixed; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(to top, var(--bg) 70%, transparent);
+    padding: 16px 16px calc(16px + var(--safe-b));
+    z-index: 20;
+  }
+  .dock-inner { max-width: 520px; margin: 0 auto; display: flex; gap: 10px; }
+  #save-btn { flex: 1; font-size: 16px; }
+  #save-btn:disabled { opacity: 0.5; cursor: default; }
+  .status { text-align: center; font-size: 13px; margin-top: 8px; color: var(--muted); }
+  .status.ok { color: var(--accent); }
+  .status.bad { color: var(--danger); }
+
+  /* History */
+  .hist { margin-top: 8px; }
+  .hist h3 { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 20px 0 10px; }
+  .hist-item {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+    padding: 12px 14px; margin-bottom: 8px;
+  }
+  .hist-item .when { font-weight: 650; }
+  .hist-item .sum { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+  .toast {
+    display: none; position: fixed; top: calc(16px + var(--safe-t)); left: 50%; transform: translateX(-50%);
+    background: var(--accent-bg); border: 1px solid var(--accent); color: var(--accent);
+    padding: 10px 16px; border-radius: 12px; font-weight: 650; z-index: 40; white-space: nowrap;
+  }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div id="toast" class="toast"></div>
+
+<section id="unlock">
+  <h1>KAIRO</h1>
+  <h2>Workout log</h2>
+  <p>Enter your passcode to log today’s session. Your training data stays private.</p>
+  <div class="row">
+    <input id="passcode" type="password" inputmode="text" autocomplete="current-password" autocapitalize="off" spellcheck="false" placeholder="Passcode" enterkeyhint="go">
+    <button type="button" id="unlock-btn">Open</button>
+  </div>
+  <div class="err" id="unlock-err"></div>
+</section>
+
+<section id="app" class="hidden">
+  <div class="wrap">
+    <header class="app">
+      <div>
+        <div class="brand">KAIRO</div>
+        <div class="sub">Workout log</div>
+      </div>
+      <button type="button" class="link" id="lock-btn">Lock</button>
+    </header>
+
+    <div class="seg" id="seg">
+      <button type="button" data-type="Push">Push<span class="chip">next</span></button>
+      <button type="button" data-type="Pull">Pull<span class="chip">next</span></button>
+      <button type="button" data-type="Legs">Legs<span class="chip">next</span></button>
+    </div>
+
+    <div class="meta">
+      <div class="field">
+        <label for="session-date">Session date</label>
+        <input id="session-date" type="date">
+      </div>
+    </div>
+    <p class="hint" id="suggest-hint"></p>
+
+    <div id="exercises"></div>
+
+    <div class="block">
+      <h3>How it felt</h3>
+      <div class="slider-row">
+        <label for="energy">Energy</label>
+        <input id="energy" type="range" min="1" max="10" value="0">
+        <div class="val off" id="energy-val">—</div>
+      </div>
+      <div class="slider-row">
+        <label for="soreness">Soreness</label>
+        <input id="soreness" type="range" min="1" max="10" value="0">
+        <div class="val off" id="soreness-val">—</div>
+      </div>
+      <textarea id="session-notes" placeholder="Session notes (optional)"></textarea>
+    </div>
+
+    <div class="hist" id="history"></div>
+  </div>
+
+  <div class="dock">
+    <div class="dock-inner">
+      <button type="button" id="save-btn">Save session</button>
+    </div>
+    <div class="status" id="save-status"></div>
+  </div>
+</section>
+
+<script>
+(function () {
+  const API = (function () {
+    if (location.hostname.endsWith('supabase.co')) {
+      return location.pathname.replace(/\/$/, '').split('?')[0];
+    }
+    return 'https://evdszcqwdrmsjkxiuwvv.supabase.co/functions/v1/kairo-log';
+  })();
+
+  const $ = (id) => document.getElementById(id);
+  let plan = null;
+  let history = [];
+  let suggested = null;
+  let currentType = 'Push';
+  let energyTouched = false;
+  let sorenessTouched = false;
+  let lastByExercise = {};
+
+  function todayIST() {
+    return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+  }
+
+  function toast(msg) {
+    const t = $('toast');
+    t.textContent = msg;
+    t.style.display = 'block';
+    setTimeout(() => { t.style.display = 'none'; }, 2200);
+  }
+
+  async function api(payload, extraHeaders) {
+    const headers = { 'Content-Type': 'application/json', ...(extraHeaders || {}) };
+    const pass = sessionStorage.getItem('kairo_pass');
+    if (pass) headers['x-kairo-passcode'] = pass;
+    const res = await fetch(API, { method: 'POST', headers, body: JSON.stringify(payload) });
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = { error: text || 'Bad response' }; }
+    if (!res.ok) {
+      const err = new Error(data.error || ('HTTP ' + res.status));
+      err.status = res.status;
+      throw err;
+    }
+    return data;
+  }
+
+  function passcode() { return $('passcode').value.trim(); }
+
+  async function unlock() {
+    $('unlock-err').textContent = '';
+    const code = passcode() || sessionStorage.getItem('kairo_pass') || '';
+    if (!code) { $('unlock-err').textContent = 'Enter your passcode.'; return; }
+    $('unlock-btn').disabled = true;
+    try {
+      sessionStorage.setItem('kairo_pass', code);
+      await load();
+      $('unlock').classList.add('hidden');
+      $('app').classList.remove('hidden');
+    } catch (e) {
+      sessionStorage.removeItem('kairo_pass');
+      $('unlock-err').textContent = e.status === 401 ? 'Wrong passcode.' : (e.message || 'Could not unlock.');
+    } finally {
+      $('unlock-btn').disabled = false;
+    }
+  }
+
+  async function load() {
+    const data = await api({ action: 'bootstrap' });
+    plan = data.plan;
+    history = data.sessions || [];
+    suggested = data.suggested;
+    lastByExercise = data.last_weights || {};
+    currentType = (suggested && suggested.type) || 'Push';
+    $('session-date').value = (suggested && suggested.date) || todayIST();
+    energyTouched = false;
+    sorenessTouched = false;
+    $('energy').value = 5;
+    $('soreness').value = 5;
+    $('energy-val').textContent = '—';
+    $('soreness-val').textContent = '—';
+    $('energy-val').classList.add('off');
+    $('soreness-val').classList.add('off');
+    $('session-notes').value = '';
+    render();
+    restoreDraft();
+  }
+
+  function render() {
+    document.querySelectorAll('#seg button').forEach((b) => {
+      b.classList.toggle('on', b.dataset.type === currentType);
+      b.classList.toggle('suggested', !!(suggested && suggested.type === b.dataset.type));
+    });
+    const sess = plan.sessions[currentType];
+    const why = suggested && suggested.type === currentType
+      ? suggested.reason
+      : (sess ? ('Default ' + sess.default_day) : '');
+    $('suggest-hint').innerHTML = sess
+      ? '<strong>' + currentType + '</strong> · ' + sess.subtitle + (why ? ' · ' + why : '')
+      : '';
+    const root = $('exercises');
+    root.innerHTML = '';
+    (sess ? sess.exercises : []).forEach((ex, i) => root.appendChild(exerciseCard(ex, i)));
+    renderHistory();
+  }
+
+  function unitLabel(ex) {
+    if (ex.unit === 's') return 'sec';
+    if (ex.unit === 'm') return 'm';
+    if (ex.unit === 'band') return '';
+    return 'kg';
+  }
+  function weightLabel(ex) {
+    if (ex.unit === 's' || ex.target === 'bodyweight') return '';
+    if (ex.unit === 'band') return '';
+    return 'kg';
+  }
+  function weightPlaceholder(ex) {
+    if (ex.target === 'bodyweight' || ex.unit === 's') return 'BW';
+    if (ex.target === 'light' || ex.unit === 'band') return 'light';
+    if (ex.target) return String(ex.target);
+    const last = lastByExercise[ex.log_name] || lastByExercise[ex.name];
+    return last ? String(last) : 'wt';
+  }
+  function repsPlaceholder(ex) {
+    if (ex.unit === 's') return 'sec';
+    if (ex.unit === 'm') return 'm';
+    if (ex.per) return ex.rep_range + '/' + ex.per;
+    return ex.rep_range;
+  }
+  function defaultWeight(ex) {
+    // Only prefill non-numeric prescribed values from the plan, or the lifter's own last weight.
+    // Never invent a kilogram target.
+    if (ex.target === 'bodyweight' || ex.unit === 's') return 'BW';
+    if (ex.target === 'light' || ex.unit === 'band') return 'light';
+    const last = lastByExercise[ex.log_name] || lastByExercise[ex.name];
+    if (last) return String(last);
+    if (ex.target && !isNaN(parseFloat(ex.target))) return String(ex.target);
+    return '';
+  }
+
+  function exerciseCard(ex, idx) {
+    const el = document.createElement('article');
+    el.className = 'ex';
+    el.dataset.idx = idx;
+    const range = ex.per ? (ex.sets + ' × ' + ex.rep_range + ' per ' + ex.per) : (ex.sets + ' × ' + ex.rep_range);
+    const tgt = ex.target == null || ex.target === '' ? '—' : String(ex.target);
+    let setsHtml = '';
+    for (let s = 1; s <= ex.sets; s++) {
+      setsHtml += '<div class="set">' +
+        '<div class="n">SET ' + s + '</div>' +
+        '<div class="inp"><input data-f="w" data-s="' + s + '" inputmode="decimal" enterkeyhint="next" placeholder="' + weightPlaceholder(ex) + '" autocomplete="off"><span>' + weightLabel(ex) + '</span></div>' +
+        '<div class="times">×</div>' +
+        '<div class="inp"><input data-f="r" data-s="' + s + '" inputmode="decimal" enterkeyhint="next" placeholder="' + repsPlaceholder(ex) + '" autocomplete="off"><span>' + unitLabel(ex) + '</span></div>' +
+        '</div>';
+    }
+    el.innerHTML =
+      '<div class="ex-head"><div class="ex-name">' + escapeHtml(ex.name) + '</div></div>' +
+      '<div class="ex-meta">' + range + ' · rest ' + escapeHtml(ex.rest) + ' · target <span class="tgt">' + escapeHtml(tgt) + '</span></div>' +
+      setsHtml +
+      '<textarea class="ex-notes" placeholder="Notes (optional)" rows="1"></textarea>';
+    // Prefill weight only (not reps)
+    const dw = defaultWeight(ex);
+    if (dw) {
+      el.querySelectorAll('input[data-f="w"]').forEach((inp) => { inp.value = dw; });
+    }
+    el.querySelectorAll('input, textarea').forEach((n) => n.addEventListener('input', saveDraft));
+    return el;
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function collect() {
+    const sess = plan.sessions[currentType];
+    const cards = [...document.querySelectorAll('#exercises .ex')];
+    const exercises = sess.exercises.map((ex, i) => {
+      const card = cards[i];
+      const sets = [];
+      for (let s = 1; s <= ex.sets; s++) {
+        const w = card.querySelector('input[data-f="w"][data-s="' + s + '"]');
+        const r = card.querySelector('input[data-f="r"][data-s="' + s + '"]');
+        const weight = (w && w.value || '').trim();
+        const reps = (r && r.value || '').trim();
+        if (weight || reps) sets.push({ weight, reps });
+      }
+      const notes = (card.querySelector('.ex-notes').value || '').trim();
+      return { name: ex.log_name || ex.name, unit: ex.unit || 'kg', per: ex.per || null, sets, notes };
+    });
+    return {
+      action: 'save',
+      session_date: $('session-date').value,
+      session_type: currentType,
+      exercises,
+      energy: energyTouched ? Number($('energy').value) : null,
+      soreness: sorenessTouched ? Number($('soreness').value) : null,
+      notes: $('session-notes').value.trim(),
+    };
+  }
+
+  function draftKey() {
+    return 'kairo_draft_' + currentType + '_' + ($('session-date').value || '');
+  }
+  function saveDraft() {
+    try { localStorage.setItem(draftKey(), JSON.stringify(collect())); } catch (e) {}
+  }
+  function restoreDraft() {
+    let raw;
+    try { raw = localStorage.getItem(draftKey()); } catch (e) { return; }
+    if (!raw) return;
+    let d;
+    try { d = JSON.parse(raw); } catch { return; }
+    if (!d || d.session_type !== currentType) return;
+    const cards = [...document.querySelectorAll('#exercises .ex')];
+    (d.exercises || []).forEach((ex, i) => {
+      const card = cards[i];
+      if (!card) return;
+      (ex.sets || []).forEach((set, si) => {
+        const w = card.querySelector('input[data-f="w"][data-s="' + (si + 1) + '"]');
+        const r = card.querySelector('input[data-f="r"][data-s="' + (si + 1) + '"]');
+        if (w && set.weight != null) w.value = set.weight;
+        if (r && set.reps != null) r.value = set.reps;
+      });
+      if (ex.notes) card.querySelector('.ex-notes').value = ex.notes;
+    });
+    if (d.energy != null) { energyTouched = true; $('energy').value = d.energy; $('energy-val').textContent = d.energy; $('energy-val').classList.remove('off'); }
+    if (d.soreness != null) { sorenessTouched = true; $('soreness').value = d.soreness; $('soreness-val').textContent = d.soreness; $('soreness-val').classList.remove('off'); }
+    if (d.notes) $('session-notes').value = d.notes;
+  }
+
+  async function save() {
+    const payload = collect();
+    const hasAny = payload.exercises.some((ex) => ex.sets.length);
+    if (!payload.session_date) { setStatus('Pick a date first.', true); return; }
+    if (!hasAny) { setStatus('Enter at least one set before saving.', true); return; }
+    $('save-btn').disabled = true;
+    setStatus('Saving…');
+    try {
+      const res = await api(payload);
+      try { localStorage.removeItem(draftKey()); } catch (e) {}
+      setStatus('Saved. ' + (res.message || 'The morning check-in will pick this up.'), false, true);
+      toast('Session saved');
+      history = res.sessions || history;
+      if (res.suggested) suggested = res.suggested;
+      renderHistory();
+    } catch (e) {
+      setStatus(e.message || 'Save failed.', true);
+    } finally {
+      $('save-btn').disabled = false;
+    }
+  }
+
+  function setStatus(msg, bad, ok) {
+    const el = $('save-status');
+    el.textContent = msg || '';
+    el.className = 'status' + (bad ? ' bad' : ok ? ' ok' : '');
+  }
+
+  function renderHistory() {
+    const root = $('history');
+    const items = (history || []).filter((s) => !s.is_test);
+    if (!items.length) { root.innerHTML = ''; return; }
+    root.innerHTML = '<h3>Recent sessions</h3>' + items.slice(0, 8).map((s) => {
+      const n = (s.exercise_count != null) ? s.exercise_count : ((s.exercises || []).filter((e) => e.sets && e.sets.length).length);
+      return '<div class="hist-item"><div class="when">' + escapeHtml(s.session_date) + ' · ' + escapeHtml(s.session_type) + '</div>' +
+        '<div class="sum">' + n + ' exercises logged' + (s.energy ? ' · energy ' + s.energy : '') + '</div></div>';
+    }).join('');
+  }
+
+  document.querySelectorAll('#seg button').forEach((b) => {
+    b.addEventListener('click', () => {
+      saveDraft();
+      currentType = b.dataset.type;
+      energyTouched = false; sorenessTouched = false;
+      $('energy-val').textContent = '—'; $('soreness-val').textContent = '—';
+      $('energy-val').classList.add('off'); $('soreness-val').classList.add('off');
+      $('session-notes').value = '';
+      render();
+      restoreDraft();
+    });
+  });
+  $('session-date').addEventListener('change', () => { render(); restoreDraft(); saveDraft(); });
+  $('energy').addEventListener('input', () => { energyTouched = true; $('energy-val').textContent = $('energy').value; $('energy-val').classList.remove('off'); saveDraft(); });
+  $('soreness').addEventListener('input', () => { sorenessTouched = true; $('soreness-val').textContent = $('soreness').value; $('soreness-val').classList.remove('off'); saveDraft(); });
+  $('session-notes').addEventListener('input', saveDraft);
+  $('unlock-btn').addEventListener('click', unlock);
+  $('passcode').addEventListener('keydown', (e) => { if (e.key === 'Enter') unlock(); });
+  $('save-btn').addEventListener('click', save);
+  $('lock-btn').addEventListener('click', () => {
+    sessionStorage.removeItem('kairo_pass');
+    $('passcode').value = '';
+    $('app').classList.add('hidden');
+    $('unlock').classList.remove('hidden');
+  });
+
+  if (sessionStorage.getItem('kairo_pass')) {
+    unlock();
+  }
+})();
+</script>
+</body>
+</html>
