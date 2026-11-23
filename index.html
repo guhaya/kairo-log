@@ -10,6 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:,">
 <title>KAIRO LOG · Project Ripped 90</title>
 <style>
   :root {
@@ -1678,7 +1679,7 @@
       if (major) s += '<text x="' + (cx + Math.cos(a) * (R - 26)).toFixed(1) + '" y="' + (cy + Math.sin(a) * (R - 26) + 3).toFixed(1) + '" fill="#6a6a6a" font-size="9" text-anchor="middle" class="cond">' + v.toFixed(1) + '</text>';
     }
     if (rate != null) {
-      const a = ang(rate); const tip = [cx + Math.cos(a) * (R - 18), cy + Math.sin(a) * (R - 18)];
+      const a = ang(rate); const tip = [cx + Math.cos(a) * (R - 36), cy + Math.sin(a) * (R - 36)];
       const n = a + Math.PI / 2; const w = 6;
       s += '<path d="M' + (cx + Math.cos(n) * w).toFixed(1) + ',' + (cy + Math.sin(n) * w).toFixed(1) + ' L' + tip[0].toFixed(1) + ',' + tip[1].toFixed(1) + ' L' + (cx - Math.cos(n) * w).toFixed(1) + ',' + (cy - Math.sin(n) * w).toFixed(1) + ' A' + w + ',' + w + ' 0 1,1 ' + (cx + Math.cos(n) * w).toFixed(1) + ',' + (cy + Math.sin(n) * w).toFixed(1) + 'Z" fill="' + C.lime + '"/>';
       s += '<circle cx="' + cx + '" cy="' + cy + '" r="2.5" fill="#000"/>';
