@@ -70,8 +70,12 @@
 
   /* Session picker */
   .seg {
-    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px;
   }
+  .seg.legacy { grid-template-columns: auto 1fr 1fr 1fr; align-items: center; gap: 6px; margin-top: -4px; }
+  .seg.legacy .lbl { font-size: 11px; color: var(--muted); letter-spacing: 0.04em; text-transform: uppercase; padding-right: 2px; }
+  .seg.legacy button { min-height: 34px; padding: 6px 4px; font-size: 12.5px; font-weight: 600; color: var(--muted); border-radius: 10px; }
+  .seg.legacy button.on { color: var(--accent); }
   .seg button {
     background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
     padding: 12px 8px; font-weight: 650; position: relative; min-height: 52px;
@@ -240,11 +244,8 @@
       <button type="button" class="link" id="lock-btn">Lock</button>
     </header>
 
-    <div class="seg" id="seg">
-      <button type="button" data-type="Push">Push<span class="chip">next</span></button>
-      <button type="button" data-type="Pull">Pull<span class="chip">next</span></button>
-      <button type="button" data-type="Legs">Legs<span class="chip">next</span></button>
-    </div>
+    <div class="seg" id="seg"></div>
+    <div class="seg legacy hidden" id="seg-legacy"></div>
 
     <div class="meta">
       <div class="field">
@@ -301,7 +302,7 @@
   let plan = null;
   let history = [];
   let suggested = null;
-  let currentType = 'Push';
+  let currentType = '';
   let energyTouched = false;
   let sorenessTouched = false;
   let editing = null;        // saved session currently loaded for editing
@@ -369,9 +370,38 @@
     plan = data.plan;
     history = data.sessions || [];
     suggested = data.suggested;
-    currentType = (suggested && suggested.type) || 'Push';
+    currentType = (suggested && suggested.type) || planOrder()[0];
     $('session-date').value = (suggested && suggested.date) || todayIST();
+    buildSeg();
     openForm();
+  }
+
+  function planOrder() {
+    return (plan && Array.isArray(plan.order) && plan.order.length) ? plan.order : Object.keys((plan && plan.sessions) || {});
+  }
+  function legacyOrder() {
+    return (plan && Array.isArray(plan.legacy_order)) ? plan.legacy_order.filter((t) => plan.legacy_sessions && plan.legacy_sessions[t]) : [];
+  }
+  function sessionDef(type) {
+    if (!plan) return null;
+    return (plan.sessions && plan.sessions[type]) || (plan.legacy_sessions && plan.legacy_sessions[type]) || null;
+  }
+  function buildSeg() {
+    const mk = (t) => '<button type="button" data-type="' + escapeHtml(t) + '">' + escapeHtml(t) + '<span class="chip">next</span></button>';
+    $('seg').innerHTML = planOrder().map(mk).join('');
+    const legacy = legacyOrder();
+    const lw = $('seg-legacy');
+    lw.innerHTML = legacy.length ? '<span class="lbl">Old PPL</span>' + legacy.map(mk).join('') : '';
+    lw.classList.toggle('hidden', !legacy.length);
+    document.querySelectorAll('#seg button, #seg-legacy button').forEach((b) => {
+      b.addEventListener('click', () => {
+        if (b.dataset.type === currentType) return;
+        saveDraft();
+        currentType = b.dataset.type;
+        savedBanner = null; setStatus('');
+        openForm();
+      });
+    });
   }
 
   /* ---------- exercise kinds and limits ---------- */
@@ -477,9 +507,12 @@
   }
   function planExerciseByName(name) {
     if (!plan) return null;
-    for (const t of Object.keys(plan.sessions)) {
-      for (const ex of plan.sessions[t].exercises) {
-        if (ex.log_name === name || ex.name === name) return ex;
+    const groups = [plan.sessions || {}, plan.legacy_sessions || {}];
+    for (const g of groups) {
+      for (const t of Object.keys(g)) {
+        for (const ex of g[t].exercises) {
+          if (ex.log_name === name || ex.name === name) return ex;
+        }
       }
     }
     return null;
@@ -531,11 +564,11 @@
   }
 
   function render() {
-    document.querySelectorAll('#seg button').forEach((b) => {
+    document.querySelectorAll('#seg button, #seg-legacy button').forEach((b) => {
       b.classList.toggle('on', b.dataset.type === currentType);
       b.classList.toggle('suggested', !!(suggested && suggested.type === b.dataset.type));
     });
-    const sess = plan.sessions[currentType];
+    const sess = sessionDef(currentType);
     const why = suggested && suggested.type === currentType ? suggested.reason : (sess ? ('Default ' + sess.default_day) : '');
     $('suggest-hint').innerHTML = sess
       ? '<strong>' + currentType + '</strong> · ' + escapeHtml(sess.subtitle) + (why ? ' · ' + escapeHtml(why) : '')
@@ -690,7 +723,7 @@
   }
 
   function refreshCard(card, ex) {
-    if (!ex) ex = plan.sessions[currentType].exercises[Number(card.dataset.idx)];
+    if (!ex) ex = sessionDef(currentType).exercises[Number(card.dataset.idx)];
     let anyBad = false;
     for (let s = 1; s <= ex.sets; s++) {
       const w = card.querySelector('input[data-f="w"][data-s="' + s + '"]');
@@ -718,7 +751,7 @@
   /* ---------- collect / fill ---------- */
 
   function collect() {
-    const sess = plan.sessions[currentType];
+    const sess = sessionDef(currentType);
     const cards = [...document.querySelectorAll('#exercises .ex')];
     const problems = [];
     const exercises = sess.exercises.map((ex, i) => {
@@ -754,7 +787,7 @@
   }
 
   function fillFrom(s) {
-    const sess = plan.sessions[currentType];
+    const sess = sessionDef(currentType);
     const cards = [...document.querySelectorAll('#exercises .ex')];
     sess.exercises.forEach((ex, i) => {
       const saved = (s.exercises || []).find((e) => e.name === (ex.log_name || ex.name) || e.name === ex.name);
@@ -961,15 +994,6 @@
     }));
   }
 
-  document.querySelectorAll('#seg button').forEach((b) => {
-    b.addEventListener('click', () => {
-      if (b.dataset.type === currentType) return;
-      saveDraft();
-      currentType = b.dataset.type;
-      savedBanner = null; setStatus('');
-      openForm();
-    });
-  });
   $('session-date').addEventListener('focus', () => saveDraft());
   $('session-date').addEventListener('change', () => { savedBanner = null; setStatus(''); openForm(); });
   $('energy').addEventListener('input', () => { energyTouched = true; setSlider('energy', $('energy').value); dirty(); });
