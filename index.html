@@ -227,7 +227,9 @@
   .tk-card h3 { margin: 0 0 10px; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
   .tk-card .big { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
   .tk-card .sub { color: var(--muted); font-size: 13px; margin-top: 2px; line-height: 1.4; }
-  .tk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .tk-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+  .tk-grid > *, .tk-f, .tk-f .inp { min-width: 0; }
+  .tk-f input[type=time] { width: 100%; }
   .tk-f label { display: block; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
   .tk-f .inp { display: flex; align-items: center; background: var(--input); border: 1px solid var(--line); border-radius: 10px; padding: 0 10px; min-height: 46px; }
   .tk-f .inp.bad { border-color: var(--danger); background: #2a1517; }
@@ -1440,6 +1442,16 @@
     const bedT = LIGHTS[Math.min(s.w, 12) - 1];
     const bedCls = s.bed == null ? '' : s.bed <= mins(bedT) + 15 ? 'ok' : 'warnc';
     const inWeek = today >= s.ws && today <= s.we;
+    if (s.w === 0) {
+      return '<div class="tk-card"><h3>Baseline week · ' + escapeHtml(prettyDate(s.ws).slice(4)) + '–' + escapeHtml(prettyDate(s.we).slice(4)) + ' (before Ripped 90)</h3><div class="kv">' +
+        row('Weight avg', s.weight != null ? fmt(s.weight, 1) + ' kg' + w : nd(), s.weightN + ' days') +
+        row('Calories', s.kcal != null ? fmt(s.kcal) : nd(), s.kcalN + ' days') +
+        row('Protein', s.protein != null ? fmt(s.protein) + ' g' : nd(), s.proteinN + ' days') +
+        row('Steps', s.steps != null ? fmt(s.steps) + (s.stepsWatch ? ' <span class="src">w/s</span>' : '') : nd(), s.stepsN + ' days') +
+        row('Sleep', s.sleep != null ? fmt(s.sleep, 1) + ' h' + (s.sleepWatch ? ' <span class="src">w/s</span>' : '') : nd(), s.sleepN + ' days') +
+        row('Bedtime avg', s.bed != null ? hhmm(s.bed) + (s.bedWatch ? ' <span class="src">w/s</span>' : '') : nd(), 'goal 23:00') +
+        '</div></div>';
+    }
     return '<div class="tk-card"><h3>Week ' + s.w + ' · ' + escapeHtml(prettyDate(s.ws).slice(4)) + '–' + escapeHtml(prettyDate(s.we).slice(4)) + (inWeek ? ' · this week' : '') + '</h3><div class="kv">' +
       row('Weight avg', s.weight != null ? fmt(s.weight, 1) + ' kg' + w : nd(), s.weightN + ' days') +
       row('Calories', s.kcal != null ? fmt(s.kcal) : nd(), s.calT ? 'target ' + fmt(s.calT) : 'target 2,200', kcalCls) +
@@ -1467,6 +1479,7 @@
     // weekly cards (current first)
     const lastW = Math.min(Math.max(wNow, 1), 12);
     for (let w = lastW; w >= 1; w--) html += weekCard(weekStats(w), today);
+    if (wNow <= 2) html += weekCard(weekStats(0), today);
     // waist
     const waist = visible(tWeekly).filter((r) => r.waist_cm != null).slice().sort((a, b) => a.entry_date < b.entry_date ? -1 : 1);
     html += '<div class="tk-card"><h3>Waist at navel</h3>';
