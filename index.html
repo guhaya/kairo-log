@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0e1116">
 <meta name="robots" content="noindex, nofollow">
-<title>KAIRO · Workout log</title>
+<title>KAIRO · Workout log & Ripped 90 tracker</title>
 <style>
   :root {
     --bg: #0e1116;
@@ -218,6 +218,52 @@
   .badge { display: inline-block; font-size: 10.5px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; border-radius: 999px; padding: 2px 7px; margin-left: 6px; }
   .badge.check { background: #3a2e10; color: var(--warn); border: 1px solid var(--warn); }
   .dock .status { min-height: 1.2em; }
+  /* Ripped 90 tracker */
+  .tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: -6px 0 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 4px; }
+  .tabs button { background: none; border: 0; border-radius: 10px; padding: 10px 4px; font-size: 13.5px; font-weight: 650; color: var(--muted); min-height: 40px; }
+  .tabs button.on { background: var(--accent-bg); color: var(--accent); }
+  .testbar { background: #2b2412; border: 1px solid var(--warn); color: var(--warn); border-radius: 12px; padding: 8px 12px; font-size: 12.5px; font-weight: 650; margin-bottom: 12px; }
+  .tk-card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px; margin-bottom: 12px; }
+  .tk-card h3 { margin: 0 0 10px; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+  .tk-card .big { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+  .tk-card .sub { color: var(--muted); font-size: 13px; margin-top: 2px; line-height: 1.4; }
+  .tk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .tk-f label { display: block; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
+  .tk-f .inp { display: flex; align-items: center; background: var(--input); border: 1px solid var(--line); border-radius: 10px; padding: 0 10px; min-height: 46px; }
+  .tk-f .inp.bad { border-color: var(--danger); background: #2a1517; }
+  .tk-f .inp.filled { border-color: #3a4a5c; background: #141b25; }
+  .tk-f input, .tk-f select { flex: 1; min-width: 0; background: transparent; border: 0; outline: none; padding: 10px 0; color: #fff; font-weight: 700; font-variant-numeric: tabular-nums; color-scheme: dark; }
+  .tk-f select option { background: var(--card); }
+  .tk-f input::placeholder { color: #4a5363; font-style: italic; font-weight: 500; }
+  .tk-f .u { color: var(--muted); font-size: 11px; font-weight: 700; margin-left: 4px; white-space: nowrap; }
+  .tk-f .msg { font-size: 12px; color: var(--danger); min-height: 0; margin-top: 4px; line-height: 1.3; }
+  .tk-full { grid-column: 1 / -1; }
+  .pick { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+  .pick.yn { grid-template-columns: repeat(3, 1fr); }
+  .pick button { background: var(--input); border: 1px solid var(--line); border-radius: 10px; min-height: 42px; font-weight: 700; color: var(--muted); }
+  .pick button.on { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); }
+  .tk-notes { width: 100%; background: var(--input); border: 1px solid var(--line); border-radius: 10px; padding: 12px; min-height: 64px; resize: vertical; }
+  .tk-save { width: 100%; margin-top: 12px; font-size: 16px; }
+  .tk-save:disabled { opacity: 0.5; }
+  .tk-list .hist-item { cursor: pointer; }
+  .kv { display: grid; grid-template-columns: 1fr auto auto; gap: 6px 10px; font-size: 13.5px; align-items: baseline; }
+  .kv .k { color: var(--muted); }
+  .kv .v { font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+  .kv .t { color: var(--faint); font-size: 12px; text-align: right; white-space: nowrap; }
+  .ok { color: var(--accent) !important; }
+  .warnc { color: var(--warn) !important; }
+  .nd { color: var(--faint) !important; font-weight: 500 !important; font-style: italic; }
+  .chart { width: 100%; height: auto; display: block; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 11.5px; color: var(--muted); margin-top: 8px; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+  .tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .tbl th { text-align: left; color: var(--muted); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 700; padding: 0 6px 6px 0; }
+  .tbl td { padding: 7px 6px 7px 0; border-top: 1px solid var(--line); vertical-align: top; font-variant-numeric: tabular-nums; }
+  .tbl td.r, .tbl th.r { text-align: right; }
+  .pill { display: inline-block; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 2px 8px; border: 1px solid var(--line); color: var(--muted); margin: 2px 4px 2px 0; }
+  .pill.next { border-color: var(--accent); color: var(--accent); }
+  .pill.done { color: var(--faint); text-decoration: line-through; }
+  .src { color: var(--faint); font-size: 11px; font-weight: 600; }
 </style>
 </head>
 <body>
@@ -239,10 +285,20 @@
     <header class="app">
       <div>
         <div class="brand">KAIRO</div>
-        <div class="sub">Workout log</div>
+        <div class="sub">Workout log · Ripped 90 tracker</div>
       </div>
       <button type="button" class="link" id="lock-btn">Lock</button>
     </header>
+
+    <div class="testbar hidden" id="testbar">TEST MODE · check-ins saved here are test rows and never reach the planner</div>
+    <nav class="tabs" id="tabs">
+      <button type="button" data-tab="workout">Workout</button>
+      <button type="button" data-tab="daily">Daily</button>
+      <button type="button" data-tab="weekly">Weekly</button>
+      <button type="button" data-tab="progress">Progress</button>
+    </nav>
+
+    <div id="tab-workout">
 
     <div class="seg" id="seg"></div>
     <div class="seg legacy hidden" id="seg-legacy"></div>
@@ -274,6 +330,10 @@
     </div>
 
     <div class="hist" id="history"></div>
+    </div>
+    <div id="tab-daily" class="hidden"></div>
+    <div id="tab-weekly" class="hidden"></div>
+    <div id="tab-progress" class="hidden"></div>
   </div>
 
   <div class="dock">
@@ -374,6 +434,7 @@
     $('session-date').value = (suggested && suggested.date) || todayIST();
     buildSeg();
     openForm();
+    trackerLoad(data);
   }
 
   function planOrder() {
@@ -1008,6 +1069,451 @@
     $('app').classList.add('hidden');
     $('unlock').classList.remove('hidden');
   });
+
+  /* ================= Ripped 90 tracker ================= */
+  const TEST = new URLSearchParams(location.search).get('test') === '1';
+  const R90 = { start: '2026-11-24', end: '2027-02-15', baseW: 92.8, targetLo: 86, targetHi: 88 };
+  const REVIEWS = ['2026-12-07', '2026-12-21', '2027-01-04', '2027-01-18', '2027-02-01', '2027-02-15'];
+  const ASSESS = [['Week 4', '2026-12-21'], ['Week 8', '2027-01-18'], ['Week 12', '2027-02-15']];
+  const LIGHTS = ['01:30', '01:00', '00:30', '00:15', '00:00', '23:45', '23:30', '23:15', '23:00', '23:00', '22:45', '22:45'];
+  const MAIN_LIFTS = ['Barbell back squat', 'Romanian deadlift', 'Barbell bench press', 'Chest-supported row', 'Lat pulldown', 'Hack squat', 'Incline Smith machine press', 'Dumbbell shrug'];
+  const R90_TYPES = ['Lower A', 'Upper B', 'Lower B', 'Upper A'];
+  const CARDIO_TYPES = ['Incline walk', 'Cycling', 'Elliptical', 'Other'];
+  const DAILY_FIELDS = [
+    { k: 'weight_kg', label: 'Morning weight', unit: 'kg', min: 30, max: 250, int: false, ph: 'e.g. 92.4' },
+    { k: 'calories', label: 'Calories', unit: 'kcal', min: 0, max: 8000, int: true, ph: '2200' },
+    { k: 'protein_g', label: 'Protein', unit: 'g', min: 0, max: 500, int: true, ph: '175' },
+    { k: 'steps', label: 'Steps', unit: '', min: 0, max: 100000, int: true, ph: '8000' },
+    { k: 'sleep_hours', label: 'Sleep', unit: 'h', min: 0, max: 16, int: false, ph: '7.5' },
+    { k: 'cardio_min', label: 'Cardio', unit: 'min', min: 0, max: 300, int: true, ph: '20' },
+    { k: 'bedtime', label: 'Bedtime', type: 'time' },
+    { k: 'wake_time', label: 'Wake time', type: 'time' },
+  ];
+  const WEEKLY_FIELDS = [
+    { k: 'waist_cm', label: 'Waist at navel', unit: 'cm', min: 50, max: 200, int: false, ph: 'e.g. 91.4' },
+    { k: 'chest_cm', label: 'Chest', unit: 'cm', min: 50, max: 200, int: false, ph: 'every 2 wks' },
+    { k: 'arm_cm', label: 'Arm', unit: 'cm', min: 15, max: 70, int: false, ph: 'every 2 wks' },
+  ];
+  let tDaily = [], tWeekly = [], tHealth = null, tab = sessionStorage.getItem('kairo_tab') || 'workout';
+  const picks = { energy: null, soreness: null, wrathx: null, photo_front: null, photo_side: null, photo_back: null };
+
+  function dDiff(a, b) { return Math.round((Date.parse(a + 'T00:00:00Z') - Date.parse(b + 'T00:00:00Z')) / 86400000); }
+  function dAdd(a, n) { const d = new Date(Date.parse(a + 'T00:00:00Z') + n * 86400000); return d.toISOString().slice(0, 10); }
+  function progWeek(date) { const d = dDiff(date, R90.start); return d < 0 ? 0 : Math.floor(d / 7) + 1; }
+  function weekStart(w) { return dAdd(R90.start, (w - 1) * 7); }
+  function stepTarget(w) { return w <= 2 ? [7000, 8000] : w <= 4 ? [8000, 9000] : w <= 8 ? [9000, 10000] : [10000, 11000]; }
+  function cardioTarget(w) { return w <= 2 ? [2, 2] : w <= 8 ? [3, 3] : [3, 4]; }
+  function fmt(n, dp) { return n == null || !isFinite(n) ? null : Number(n).toLocaleString('en-IN', { minimumFractionDigits: dp || 0, maximumFractionDigits: dp || 0 }); }
+  function nd(txt) { return '<span class="nd">' + (txt || 'no data yet') + '</span>'; }
+  function mins(t) { if (!t || !/^\d{2}:\d{2}$/.test(t)) return null; let m = Number(t.slice(0, 2)) * 60 + Number(t.slice(3)); if (m < 720) m += 1440; return m; }
+  function hhmm(m) { if (m == null) return null; m = Math.round(m) % 1440; return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); }
+  function avg(a) { const v = a.filter((x) => x != null && isFinite(x)); return v.length ? v.reduce((s, x) => s + x, 0) / v.length : null; }
+  function visible(rows) { return (rows || []).filter((r) => TEST ? true : !r.is_test); }
+  function dailyFor(date) { const rows = visible(tDaily).filter((r) => r.entry_date === date); return rows.find((r) => TEST && r.is_test) || rows.find((r) => !r.is_test) || rows[0] || null; }
+  function weeklyFor(date) { const rows = visible(tWeekly).filter((r) => r.entry_date === date); return rows.find((r) => TEST && r.is_test) || rows.find((r) => !r.is_test) || rows[0] || null; }
+  function healthRow(date) { const rows = (tHealth && tHealth.rows) || []; return rows.find((r) => r.date === date) || null; }
+  function workoutsOn(date) { return realSessions().filter((s) => s.session_date === date && R90_TYPES.includes(s.session_type) && (s.exercises || []).some((e) => (e.sets || []).length)); }
+  // Merged day: manual entry first, then watch/scale for weight, steps, sleep.
+  function day(date) {
+    const m = dailyFor(date) || {};
+    const h = healthRow(date) || {};
+    const pick = (mk, hk) => m[mk] != null ? { v: Number(m[mk]), src: 'log' } : (h[hk] != null ? { v: Number(h[hk]), src: 'watch' } : { v: null, src: null });
+    return {
+      date, manual: !!dailyFor(date),
+      weight: pick('weight_kg', 'weight_kg'), steps: pick('steps', 'steps'), sleep: pick('sleep_hours', 'sleep_hours'),
+      bedtime: m.bedtime ? { v: m.bedtime, src: 'log' } : (h.sleep_start ? { v: h.sleep_start, src: 'watch' } : { v: null, src: null }),
+      calories: m.calories != null ? Number(m.calories) : null, protein: m.protein_g != null ? Number(m.protein_g) : null,
+      cardio: m.cardio_min != null && Number(m.cardio_min) > 0, training: workoutsOn(date).length > 0,
+    };
+  }
+
+  /* ---------- tabs ---------- */
+  function setTab(t) {
+    tab = t; sessionStorage.setItem('kairo_tab', t);
+    document.querySelectorAll('#tabs button').forEach((b) => b.classList.toggle('on', b.dataset.tab === t));
+    ['workout', 'daily', 'weekly', 'progress'].forEach((x) => $('tab-' + x).classList.toggle('hidden', x !== t));
+    document.querySelector('.dock').classList.toggle('hidden', t !== 'workout');
+    if (t === 'daily') renderDaily();
+    if (t === 'weekly') renderWeekly();
+    if (t === 'progress') renderProgress();
+  }
+  document.querySelectorAll('#tabs button').forEach((b) => b.addEventListener('click', () => setTab(b.dataset.tab)));
+  if (TEST) $('testbar').classList.remove('hidden');
+
+  function trackerLoad(data) {
+    tDaily = data.daily || []; tWeekly = data.weekly || []; tHealth = data.health || null;
+    setTab(tab);
+  }
+
+  /* ---------- shared form helpers ---------- */
+  function fieldHtml(f, prefix) {
+    const id = prefix + f.k;
+    let control;
+    if (f.type === 'time') control = '<input id="' + id + '" type="time">';
+    else control = '<input id="' + id + '" inputmode="' + (f.int ? 'numeric' : 'decimal') + '" autocomplete="off" placeholder="' + escapeHtml(f.ph || '') + '">';
+    return '<div class="tk-f"><label for="' + id + '">' + escapeHtml(f.label) + (f.min != null ? ' <span class="src">' + f.min + '–' + fmt(f.max) + '</span>' : '') + '</label>' +
+      '<div class="inp">' + control + (f.unit ? '<span class="u">' + f.unit + '</span>' : '') + '</div><div class="msg" id="' + id + '-msg"></div></div>';
+  }
+  function checkNum(f, raw) {
+    const s = String(raw == null ? '' : raw).trim().replace(',', '.');
+    if (!s) return { v: null };
+    const re = f.int ? /^\d+$/ : /^\d+(\.\d{1,2})?$/;
+    if (!re.test(s)) return { err: f.int ? 'Whole number only' : 'Number only (up to 2 decimals)' };
+    const n = Number(s);
+    if (n < f.min || n > f.max) return { err: n + (f.unit ? ' ' + f.unit : '') + ' is out of range (' + f.min + '–' + fmt(f.max) + ')' };
+    return { v: n };
+  }
+  function validateFields(fields, prefix) {
+    const out = {}; let bad = 0;
+    for (const f of fields) {
+      const el = $(prefix + f.k); const box = el.parentElement; const msg = $(prefix + f.k + '-msg');
+      let r;
+      if (f.type === 'time') { const v = el.value.trim(); r = !v ? { v: null } : /^([01]\d|2[0-3]):[0-5]\d$/.test(v) ? { v } : { err: 'Use a time like 23:30' }; }
+      else r = checkNum(f, el.value);
+      box.classList.toggle('bad', !!r.err); box.classList.toggle('filled', !r.err && r.v != null);
+      msg.textContent = r.err || '';
+      if (r.err) bad++; else out[f.k] = r.v;
+    }
+    return { out, bad };
+  }
+  function pickHtml(name, opts) {
+    return '<div class="pick' + (opts.length === 2 ? ' yn' : '') + '" data-pick="' + name + '">' +
+      opts.map((o) => '<button type="button" data-v="' + o[0] + '">' + o[1] + '</button>').join('') +
+      '<button type="button" data-v="">—</button></div>';
+  }
+  function bindPicks(root) {
+    root.querySelectorAll('[data-pick]').forEach((p) => p.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => {
+      const name = p.dataset.pick; const v = b.dataset.v;
+      picks[name] = v === '' ? null : (v === 'true' ? true : v === 'false' ? false : Number(v));
+      paintPicks(root);
+    })));
+  }
+  function paintPicks(root) {
+    root.querySelectorAll('[data-pick]').forEach((p) => p.querySelectorAll('button').forEach((b) => {
+      const cur = picks[p.dataset.pick]; const v = b.dataset.v;
+      b.classList.toggle('on', cur == null ? v === '' : String(cur) === v);
+    }));
+  }
+  function setVal(id, v) { const el = $(id); if (el) el.value = v == null ? '' : String(v); }
+
+  /* ---------- daily check-in ---------- */
+  function buildDaily() {
+    const root = $('tab-daily');
+    if (root.dataset.built) return;
+    root.dataset.built = '1';
+    root.innerHTML =
+      '<div class="tk-card"><h3>Daily check-in</h3>' +
+      '<div class="tk-f" style="margin-bottom:12px"><label for="d-date">Date</label><div class="inp"><input id="d-date" type="date"></div></div>' +
+      '<div class="banner hidden" id="d-banner"></div>' +
+      '<div class="tk-grid">' + DAILY_FIELDS.slice(0, 5).map((f) => fieldHtml(f, 'd-')).join('') +
+      '<div class="tk-f"><label for="d-cardio_type">Cardio type</label><div class="inp"><select id="d-cardio_type"><option value="">None</option>' + CARDIO_TYPES.map((t) => '<option>' + t + '</option>').join('') + '</select></div><div class="msg" id="d-cardio_type-msg"></div></div>' +
+      DAILY_FIELDS.slice(5).map((f) => fieldHtml(f, 'd-')).join('') + '</div>' +
+      '<div class="tk-f" style="margin-top:12px"><label>Energy (1–5)</label>' + pickHtml('energy', [[1, '1'], [2, '2'], [3, '3'], [4, '4'], [5, '5']]) + '</div>' +
+      '<div class="tk-f" style="margin-top:12px"><label>Soreness (1–5)</label>' + pickHtml('soreness', [[1, '1'], [2, '2'], [3, '3'], [4, '4'], [5, '5']]) + '</div>' +
+      '<div class="tk-f" style="margin-top:12px"><label>WrathX taken today</label>' + pickHtml('wrathx', [['true', 'Yes'], ['false', 'No']]) + '</div>' +
+      '<div class="tk-f" style="margin-top:12px"><label for="d-notes">Notes</label><textarea class="tk-notes" id="d-notes" maxlength="1000" placeholder="Optional"></textarea></div>' +
+      '<button type="button" class="btn-primary tk-save" id="d-save">Save check-in</button>' +
+      '<div class="status" id="d-status"></div></div>' +
+      '<div class="hist tk-list" id="d-list"></div>';
+    bindPicks(root);
+    $('d-date').value = todayIST();
+    $('d-date').addEventListener('change', fillDaily);
+    root.querySelectorAll('input:not([type=date]), select').forEach((el) => el.addEventListener('input', () => validateFields(DAILY_FIELDS, 'd-')));
+    $('d-save').addEventListener('click', saveDaily);
+  }
+  function fillDaily() {
+    const date = $('d-date').value;
+    const r = dailyFor(date);
+    DAILY_FIELDS.forEach((f) => setVal('d-' + f.k, r ? r[f.k] : null));
+    setVal('d-cardio_type', r ? r.cardio_type : '');
+    setVal('d-notes', r ? r.notes : '');
+    picks.energy = r ? r.energy : null; picks.soreness = r ? r.soreness : null; picks.wrathx = r ? r.wrathx : null;
+    paintPicks($('tab-daily'));
+    validateFields(DAILY_FIELDS, 'd-');
+    const b = $('d-banner');
+    b.className = 'banner' + (r ? ' edit' : ' hidden');
+    b.innerHTML = r ? '<b>Editing ' + escapeHtml(prettyDate(date)) + '</b> (already saved). Saving replaces it.' : '';
+    $('d-status').textContent = '';
+  }
+  function renderDaily() {
+    buildDaily(); fillDaily();
+    const rows = visible(tDaily).slice(0, 14);
+    $('d-list').innerHTML = '<h3>Recent check-ins · tap to edit</h3>' + (rows.length ? rows.map((r, i) => {
+      const bits = [r.weight_kg != null ? r.weight_kg + ' kg' : null, r.calories != null ? fmt(r.calories) + ' kcal' : null, r.protein_g != null ? r.protein_g + ' g P' : null,
+        r.steps != null ? fmt(r.steps) + ' steps' : null, r.sleep_hours != null ? r.sleep_hours + ' h sleep' : null, r.cardio_min ? (r.cardio_type || 'Cardio') + ' ' + r.cardio_min + ' min' : null].filter(Boolean).join(' · ');
+      return '<button type="button" class="hist-item" data-d="' + i + '"><div class="row1"><div class="when">' + escapeHtml(prettyDate(r.entry_date)) + (r.is_test ? '<span class="badge check">TEST</span>' : '') + '</div><span class="edit">Edit ›</span></div><div class="sets">' + escapeHtml(bits || 'Notes only') + '</div></button>';
+    }).join('') : '<p class="hint">No check-ins yet.</p>');
+    $('d-list').querySelectorAll('[data-d]').forEach((btn) => btn.addEventListener('click', () => {
+      $('d-date').value = rows[Number(btn.dataset.d)].entry_date; fillDaily(); window.scrollTo({ top: 0, behavior: 'smooth' });
+    }));
+  }
+  async function saveDaily() {
+    const v = validateFields(DAILY_FIELDS, 'd-');
+    const st = $('d-status');
+    const date = $('d-date').value;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { st.className = 'status bad'; st.textContent = 'Pick a date.'; return; }
+    if (v.bad) { st.className = 'status bad'; st.textContent = 'Fix ' + v.bad + ' value' + (v.bad > 1 ? 's' : '') + ' in red first.'; return; }
+    const payload = Object.assign({ action: 'save_daily', entry_date: date, is_test: TEST }, v.out, {
+      cardio_type: $('d-cardio_type').value || null, energy: picks.energy, soreness: picks.soreness, wrathx: picks.wrathx, notes: $('d-notes').value.trim(),
+    });
+    if (payload.cardio_min && !payload.cardio_type) { $('d-cardio_type-msg').textContent = 'Pick a type for the cardio minutes'; st.className = 'status bad'; st.textContent = 'Pick a cardio type.'; return; }
+    $('d-cardio_type-msg').textContent = '';
+    const filled = Object.keys(payload).filter((k) => !['action', 'entry_date', 'is_test'].includes(k) && payload[k] != null && payload[k] !== '');
+    if (!filled.length) { st.className = 'status bad'; st.textContent = 'Enter at least one value.'; return; }
+    $('d-save').disabled = true; st.className = 'status'; st.textContent = 'Saving…';
+    try {
+      const res = await api(payload);
+      tDaily = res.daily || tDaily; tWeekly = res.weekly || tWeekly;
+      st.className = 'status ok'; st.textContent = '✓ Saved ' + prettyDate(date) + (TEST ? ' (test)' : '');
+      toast('Check-in saved'); renderDaily(); st.className = 'status ok'; st.textContent = '✓ Saved ' + prettyDate(date) + (TEST ? ' (test)' : '');
+    } catch (e) {
+      st.className = 'status bad'; st.textContent = e.status === 401 ? 'Passcode expired. Lock and unlock again.' : (e.message || 'Could not save');
+    } finally { $('d-save').disabled = false; }
+  }
+
+  /* ---------- weekly measurements ---------- */
+  function buildWeekly() {
+    const root = $('tab-weekly');
+    if (root.dataset.built) return;
+    root.dataset.built = '1';
+    root.innerHTML =
+      '<div class="tk-card"><h3>Weekly measurements</h3>' +
+      '<p class="hint" id="w-hint"></p>' +
+      '<div class="tk-f" style="margin-bottom:12px"><label for="w-date">Date measured</label><div class="inp"><input id="w-date" type="date"></div></div>' +
+      '<div class="banner hidden" id="w-banner"></div>' +
+      '<div class="tk-grid">' + WEEKLY_FIELDS.map((f, i) => (i === 0 ? '<div class="tk-full">' + fieldHtml(f, 'w-') + '</div>' : fieldHtml(f, 'w-'))).join('') + '</div>' +
+      '<div class="tk-f" style="margin-top:12px"><label>Photo taken: front</label>' + pickHtml('photo_front', [['true', 'Yes'], ['false', 'No']]) + '</div>' +
+      '<div class="tk-f" style="margin-top:12px"><label>Photo taken: side</label>' + pickHtml('photo_side', [['true', 'Yes'], ['false', 'No']]) + '</div>' +
+      '<div class="tk-f" style="margin-top:12px"><label>Photo taken: back</label>' + pickHtml('photo_back', [['true', 'Yes'], ['false', 'No']]) + '</div>' +
+      '<div class="tk-f" style="margin-top:12px"><label for="w-notes">Notes</label><textarea class="tk-notes" id="w-notes" maxlength="1000" placeholder="Optional"></textarea></div>' +
+      '<button type="button" class="btn-primary tk-save" id="w-save">Save measurements</button>' +
+      '<div class="status" id="w-status"></div></div>' +
+      '<div class="hist tk-list" id="w-list"></div>';
+    bindPicks(root);
+    $('w-date').value = todayIST();
+    $('w-date').addEventListener('change', fillWeekly);
+    root.querySelectorAll('input:not([type=date])').forEach((el) => el.addEventListener('input', () => validateFields(WEEKLY_FIELDS, 'w-')));
+    $('w-save').addEventListener('click', saveWeekly);
+  }
+  function fillWeekly() {
+    const date = $('w-date').value;
+    const r = weeklyFor(date);
+    WEEKLY_FIELDS.forEach((f) => setVal('w-' + f.k, r ? r[f.k] : null));
+    setVal('w-notes', r ? r.notes : '');
+    ['photo_front', 'photo_side', 'photo_back'].forEach((k) => { picks[k] = r ? r[k] : null; });
+    paintPicks($('tab-weekly'));
+    validateFields(WEEKLY_FIELDS, 'w-');
+    const w = progWeek(date);
+    const photoWeek = w > 0 && w % 2 === 0;
+    $('w-hint').innerHTML = (w ? '<strong>Programme week ' + Math.min(w, 12) + '.</strong> ' : '<strong>Before the programme.</strong> ') +
+      'Waist at the navel every week, relaxed, after breathing out. Chest, arm and the photo checklist every 2 weeks' + (photoWeek ? ' — <strong>due this week</strong>.' : ' (weeks 2, 4, 6, 8, 10, 12).') + ' No photo uploads; just record whether you took them.';
+    const b = $('w-banner');
+    b.className = 'banner' + (r ? ' edit' : ' hidden');
+    b.innerHTML = r ? '<b>Editing ' + escapeHtml(prettyDate(date)) + '</b> (already saved). Saving replaces it.' : '';
+    $('w-status').textContent = '';
+  }
+  function renderWeekly() {
+    buildWeekly(); fillWeekly();
+    const rows = visible(tWeekly).slice(0, 12);
+    const yn = (v) => v == null ? '—' : v ? '✓' : '✗';
+    $('w-list').innerHTML = '<h3>Recent measurements · tap to edit</h3>' + (rows.length ? rows.map((r, i) => {
+      const bits = [r.waist_cm != null ? 'Waist ' + r.waist_cm + ' cm' : null, r.chest_cm != null ? 'Chest ' + r.chest_cm + ' cm' : null, r.arm_cm != null ? 'Arm ' + r.arm_cm + ' cm' : null,
+        (r.photo_front != null || r.photo_side != null || r.photo_back != null) ? 'Photos F' + yn(r.photo_front) + ' S' + yn(r.photo_side) + ' B' + yn(r.photo_back) : null].filter(Boolean).join(' · ');
+      return '<button type="button" class="hist-item" data-w="' + i + '"><div class="row1"><div class="when">' + escapeHtml(prettyDate(r.entry_date)) + (r.is_test ? '<span class="badge check">TEST</span>' : '') + '</div><span class="edit">Edit ›</span></div><div class="sets">' + escapeHtml(bits || 'Notes only') + '</div></button>';
+    }).join('') : '<p class="hint">No measurements yet. The waist in your plan (91.44 cm) is self-reported; re-measure it this week.</p>');
+    $('w-list').querySelectorAll('[data-w]').forEach((btn) => btn.addEventListener('click', () => {
+      $('w-date').value = rows[Number(btn.dataset.w)].entry_date; fillWeekly(); window.scrollTo({ top: 0, behavior: 'smooth' });
+    }));
+  }
+  async function saveWeekly() {
+    const v = validateFields(WEEKLY_FIELDS, 'w-');
+    const st = $('w-status');
+    const date = $('w-date').value;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { st.className = 'status bad'; st.textContent = 'Pick a date.'; return; }
+    if (v.bad) { st.className = 'status bad'; st.textContent = 'Fix ' + v.bad + ' value' + (v.bad > 1 ? 's' : '') + ' in red first.'; return; }
+    const payload = Object.assign({ action: 'save_weekly', entry_date: date, is_test: TEST }, v.out, {
+      photo_front: picks.photo_front, photo_side: picks.photo_side, photo_back: picks.photo_back, notes: $('w-notes').value.trim(),
+    });
+    const filled = Object.keys(payload).filter((k) => !['action', 'entry_date', 'is_test'].includes(k) && payload[k] != null && payload[k] !== '');
+    if (!filled.length) { st.className = 'status bad'; st.textContent = 'Enter at least one value.'; return; }
+    $('w-save').disabled = true; st.className = 'status'; st.textContent = 'Saving…';
+    try {
+      const res = await api(payload);
+      tDaily = res.daily || tDaily; tWeekly = res.weekly || tWeekly;
+      toast('Measurements saved'); renderWeekly();
+      $('w-status').className = 'status ok'; $('w-status').textContent = '✓ Saved ' + prettyDate(date) + (TEST ? ' (test)' : '');
+    } catch (e) {
+      st.className = 'status bad'; st.textContent = e.status === 401 ? 'Passcode expired. Lock and unlock again.' : (e.message || 'Could not save');
+    } finally { $('w-save').disabled = false; }
+  }
+
+  /* ---------- progress dashboard ---------- */
+  function topSet(sets) {
+    let best = null;
+    for (const s of sets || []) {
+      const w = parseNum(s.weight || ''); const r = Number(String(s.reps || '').trim());
+      if (w == null || !(r >= 1 && r <= 50)) continue;
+      if (!best || w > best.w || (w === best.w && r > best.r)) best = { w, r };
+    }
+    return best;
+  }
+  function e1rm(t) { return t ? t.w * (1 + t.r / 30) : null; }
+  function liftHistory(name) {
+    const out = [];
+    const sess = realSessions().filter((s) => !s.is_test).slice().sort((a, b) => a.session_date < b.session_date ? -1 : 1);
+    for (const s of sess) for (const e of s.exercises || []) if (e.name === name) { const t = topSet(e.sets); if (t) out.push({ date: s.session_date, t, e: e1rm(t) }); }
+    return out;
+  }
+  function weightSeries(from, to) {
+    const pts = [];
+    for (let d = from; d <= to; d = dAdd(d, 1)) { const x = day(d); if (x.weight.v != null) pts.push({ d, v: x.weight.v, src: x.weight.src }); }
+    return pts;
+  }
+  function trailingAvg(pts, date) {
+    const win = pts.filter((p) => dDiff(date, p.d) >= 0 && dDiff(date, p.d) < 7);
+    return win.length >= 3 ? avg(win.map((p) => p.v)) : null;
+  }
+  function weightChart(today) {
+    const from = dAdd(R90.start, -21), to = R90.end;
+    const pts = weightSeries(from, today < to ? today : to);
+    if (!pts.length) return '<div class="tk-card"><h3>Weight</h3>' + nd('No weight data yet.') + '</div>';
+    const W = 340, H = 190, L = 30, Rr = 8, T = 10, B = 22;
+    const span = dDiff(to, from);
+    const vals = pts.map((p) => p.v).concat([R90.baseW, R90.targetLo - 1.5]);
+    const yMin = Math.floor(Math.min.apply(null, vals) - 0.5), yMax = Math.ceil(Math.max.apply(null, vals) + 0.5);
+    const X = (d) => L + (W - L - Rr) * dDiff(d, from) / span;
+    const Y = (v) => T + (H - T - B) * (yMax - v) / (yMax - yMin);
+    let svg = '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Weight trend">';
+    for (let v = yMin; v <= yMax; v += (yMax - yMin > 8 ? 2 : 1)) svg += '<line x1="' + L + '" x2="' + (W - Rr) + '" y1="' + Y(v) + '" y2="' + Y(v) + '" stroke="#232b39" stroke-width="1"/><text x="' + (L - 4) + '" y="' + (Y(v) + 3) + '" fill="#5c6678" font-size="9" text-anchor="end">' + v + '</text>';
+    const endW = dDiff(R90.end, R90.start) / 7;
+    const band = [[R90.start, R90.baseW, R90.baseW], [R90.end, R90.baseW - 0.4 * endW, R90.baseW - 0.7 * endW]];
+    svg += '<polygon points="' + X(band[0][0]) + ',' + Y(band[0][1]) + ' ' + X(band[1][0]) + ',' + Y(band[1][1]) + ' ' + X(band[1][0]) + ',' + Y(band[1][2]) + ' ' + X(band[0][0]) + ',' + Y(band[0][2]) + '" fill="#3dbe9a" fill-opacity="0.12" stroke="#3dbe9a" stroke-opacity="0.35" stroke-dasharray="3 3"/>';
+    svg += '<rect x="' + X(dAdd(R90.end, -6)) + '" width="' + (X(R90.end) - X(dAdd(R90.end, -6))) + '" y="' + Y(R90.targetHi) + '" height="' + (Y(R90.targetLo) - Y(R90.targetHi)) + '" fill="#e6b84d" fill-opacity="0.35"/>';
+    svg += '<line x1="' + X(R90.start) + '" x2="' + X(R90.start) + '" y1="' + T + '" y2="' + (H - B) + '" stroke="#5c6678" stroke-dasharray="2 3"/>';
+    if (today >= from && today <= to) svg += '<line x1="' + X(today) + '" x2="' + X(today) + '" y1="' + T + '" y2="' + (H - B) + '" stroke="#8b95a8" stroke-opacity="0.5"/>';
+    const segs = []; let seg = [];
+    for (let d = pts[0].d; d <= pts[pts.length - 1].d; d = dAdd(d, 1)) {
+      const a = trailingAvg(pts, d);
+      if (a != null) seg.push(X(d).toFixed(1) + ',' + Y(a).toFixed(1)); else if (seg.length) { segs.push(seg); seg = []; }
+    }
+    if (seg.length) segs.push(seg);
+    const path = segs.map((g) => 'M' + g.join(' L')).join(' ');
+    if (path) svg += '<path d="' + path + '" fill="none" stroke="#3dbe9a" stroke-width="2"/>';
+    for (const p of pts) svg += '<circle cx="' + X(p.d).toFixed(1) + '" cy="' + Y(p.v).toFixed(1) + '" r="2.4" fill="' + (p.src === 'log' ? '#eef1f6' : 'none') + '" stroke="' + (p.src === 'log' ? '#eef1f6' : '#8b95a8') + '" stroke-width="1"/>';
+    [[from, prettyDate(from).slice(4)], [R90.start, '24 Nov'], ['2026-12-21', 'Wk 4'], ['2027-01-18', 'Wk 8'], [R90.end, '15 Feb']].forEach((t) => {
+      svg += '<text x="' + X(t[0]) + '" y="' + (H - 6) + '" fill="#5c6678" font-size="9" text-anchor="' + (t[0] === R90.end ? 'end' : t[0] === from ? 'start' : 'middle') + '">' + t[1] + '</text>';
+    });
+    svg += '</svg>';
+    const last = pts[pts.length - 1];
+    const a7 = trailingAvg(pts, last.d);
+    const wNow = progWeek(today);
+    const exp = wNow > 0 ? [R90.baseW - 0.7 * dDiff(today, R90.start) / 7, R90.baseW - 0.4 * dDiff(today, R90.start) / 7] : null;
+    const status = a7 == null || !exp ? '' : a7 > exp[1] + 0.05 ? ' <span class="warnc">above the band</span>' : a7 < exp[0] - 0.05 ? ' <span class="warnc">below the band (losing fast)</span>' : ' <span class="ok">inside the band</span>';
+    return '<div class="tk-card"><h3>Weight · 7-day average</h3><div class="big">' + (a7 != null ? fmt(a7, 1) + ' kg' : nd('need 3 weigh-ins in 7 days')) + '</div>' +
+      '<div class="sub">Latest ' + fmt(last.v, 2) + ' kg on ' + escapeHtml(prettyDate(last.d)) + (last.src === 'watch' ? ' <span class="src">from watch/scale</span>' : '') +
+      (exp ? ' · expected today ' + fmt(exp[0], 1) + '–' + fmt(exp[1], 1) + ' kg' + status : ' · band starts 24 Nov from ' + R90.baseW + ' kg') + '</div>' + svg +
+      '<div class="legend"><span><i style="background:#3dbe9a"></i>7-day average</span><span><i style="background:#eef1f6"></i>Your log</span><span><i style="border:1px solid #8b95a8"></i>From watch/scale</span><span><i style="background:#3dbe9a;opacity:.3"></i>0.4–0.7 kg/week band</span><span><i style="background:#e6b84d;opacity:.6"></i>86–88 kg target</span></div></div>';
+  }
+  function weekStats(w) {
+    const ws = weekStart(w), we = dAdd(ws, 6);
+    const days = []; for (let d = ws; d <= we; d = dAdd(d, 1)) days.push(day(d));
+    const kc = days.filter((x) => x.calories != null);
+    const calT = kc.length ? avg(kc.map((x) => x.training ? 2300 : 2070)) : null;
+    const sess = realSessions().filter((s) => !s.is_test && s.session_date >= ws && s.session_date <= we && R90_TYPES.includes(s.session_type) && (s.exercises || []).some((e) => (e.sets || []).length)).length;
+    const cardio = days.filter((x) => x.cardio).length;
+    const bt = avg(days.map((x) => mins(x.bedtime.v)));
+    return {
+      w, ws, we, days,
+      weight: avg(days.map((x) => x.weight.v)), weightN: days.filter((x) => x.weight.v != null).length, weightWatch: days.some((x) => x.weight.src === 'watch'),
+      kcal: avg(kc.map((x) => x.calories)), kcalN: kc.length, calT,
+      protein: avg(days.map((x) => x.protein)), proteinN: days.filter((x) => x.protein != null).length,
+      steps: avg(days.map((x) => x.steps.v)), stepsN: days.filter((x) => x.steps.v != null).length, stepsWatch: days.some((x) => x.steps.src === 'watch'),
+      sleep: avg(days.map((x) => x.sleep.v)), sleepN: days.filter((x) => x.sleep.v != null).length, sleepWatch: days.some((x) => x.sleep.src === 'watch'),
+      bed: bt, bedWatch: days.some((x) => x.bedtime.src === 'watch'), sess, cardio, manual: days.filter((x) => x.manual).length,
+    };
+  }
+  function row(k, v, t, cls) { return '<div class="k">' + k + '</div><div class="v ' + (cls || '') + '">' + v + '</div><div class="t">' + t + '</div>'; }
+  function weekCard(s, today) {
+    const st = stepTarget(s.w), ct = cardioTarget(s.w);
+    const w = (s.weightWatch ? ' <span class="src">w/s</span>' : '');
+    const kcalCls = s.kcal == null ? '' : Math.abs(s.kcal - s.calT) <= 100 ? 'ok' : 'warnc';
+    const bedT = LIGHTS[Math.min(s.w, 12) - 1];
+    const bedCls = s.bed == null ? '' : s.bed <= mins(bedT) + 15 ? 'ok' : 'warnc';
+    const inWeek = today >= s.ws && today <= s.we;
+    return '<div class="tk-card"><h3>Week ' + s.w + ' · ' + escapeHtml(prettyDate(s.ws).slice(4)) + '–' + escapeHtml(prettyDate(s.we).slice(4)) + (inWeek ? ' · this week' : '') + '</h3><div class="kv">' +
+      row('Weight avg', s.weight != null ? fmt(s.weight, 1) + ' kg' + w : nd(), s.weightN + ' days') +
+      row('Calories', s.kcal != null ? fmt(s.kcal) : nd(), s.calT ? 'target ' + fmt(s.calT) : 'target 2,200', kcalCls) +
+      row('Protein', s.protein != null ? fmt(s.protein) + ' g' : nd(), 'target 175 g', s.protein == null ? '' : s.protein >= 165 ? 'ok' : 'warnc') +
+      row('Steps', s.steps != null ? fmt(s.steps) + (s.stepsWatch ? ' <span class="src">w/s</span>' : '') : nd(), fmt(st[0]) + '–' + fmt(st[1]), s.steps == null ? '' : s.steps >= st[0] ? 'ok' : 'warnc') +
+      row('Sleep', s.sleep != null ? fmt(s.sleep, 1) + ' h' + (s.sleepWatch ? ' <span class="src">w/s</span>' : '') : nd(), '7.5–8 h', s.sleep == null ? '' : s.sleep >= 7.5 ? 'ok' : 'warnc') +
+      row('Bedtime avg', s.bed != null ? hhmm(s.bed) + (s.bedWatch ? ' <span class="src">w/s</span>' : '') : nd(), 'by ' + bedT + ' → 23:00', bedCls) +
+      row('Sessions', s.sess + ' / 4', 'Ripped 90', s.sess >= 4 ? 'ok' : (inWeek ? '' : 'warnc')) +
+      row('Cardio', s.cardio + ' / ' + (ct[0] === ct[1] ? ct[0] : ct[0] + '–' + ct[1]), 'logged in check-in', s.cardio >= ct[0] ? 'ok' : (inWeek ? '' : 'warnc')) +
+      '</div></div>';
+  }
+  function renderProgress() {
+    const root = $('tab-progress');
+    const today = todayIST();
+    const wNow = progWeek(today);
+    const nextReview = REVIEWS.find((d) => d >= today);
+    let html = '';
+    // programme header
+    html += '<div class="tk-card"><h3>Project Ripped 90 · 24 Nov 2026 → 15 Feb 2027</h3><div class="big">' +
+      (wNow === 0 ? 'Starts Tue 24 Nov' : wNow > 12 ? 'Programme complete' : 'Week ' + wNow + ' of 12') + '</div>' +
+      '<div class="sub">' + (wNow >= 1 && wNow <= 12 ? 'Day ' + (dDiff(today, R90.start) + 1) + ' of 84 · ' : '') + 'Next calorie review: ' + (nextReview ? '<b>' + escapeHtml(prettyDate(nextReview)) + '</b> (' + dDiff(nextReview, today) + ' days)' : 'none left') + '</div>' +
+      '<div style="margin-top:8px">' + REVIEWS.map((d) => '<span class="pill ' + (d === nextReview ? 'next' : d < today ? 'done' : '') + '">Review ' + escapeHtml(prettyDate(d).slice(4)) + '</span>').join('') + '</div>' +
+      '<div>' + ASSESS.map((a) => '<span class="pill ' + (a[1] === ASSESS.map((x) => x[1]).find((d) => d >= today) ? 'next' : a[1] < today ? 'done' : '') + '">' + a[0] + ' assessment · ' + escapeHtml(prettyDate(a[1]).slice(4)) + '</span>').join('') + '</div></div>';
+    html += weightChart(today);
+    // weekly cards (current first)
+    const lastW = Math.min(Math.max(wNow, 1), 12);
+    for (let w = lastW; w >= 1; w--) html += weekCard(weekStats(w), today);
+    // waist
+    const waist = visible(tWeekly).filter((r) => r.waist_cm != null).slice().sort((a, b) => a.entry_date < b.entry_date ? -1 : 1);
+    html += '<div class="tk-card"><h3>Waist at navel</h3>';
+    if (!waist.length) html += nd('No measurements yet.') + '<div class="sub">Plan baseline 91.44 cm is self-reported, not measured in the app. Re-measure in week 1.</div>';
+    else {
+      const first = waist[0], last = waist[waist.length - 1];
+      html += '<div class="big">' + fmt(last.waist_cm, 1) + ' cm</div><div class="sub">' + (waist.length > 1 ? (last.waist_cm - first.waist_cm >= 0 ? '+' : '') + fmt(last.waist_cm - first.waist_cm, 1) + ' cm since ' + escapeHtml(prettyDate(first.entry_date)) : 'First measurement, ' + escapeHtml(prettyDate(first.entry_date))) + '</div>';
+      html += '<table class="tbl" style="margin-top:8px"><tr><th>Date</th><th class="r">Waist</th><th class="r">Chest</th><th class="r">Arm</th></tr>' +
+        visible(tWeekly).slice(0, 8).map((r) => '<tr><td>' + escapeHtml(prettyDate(r.entry_date)) + (r.is_test ? ' <span class="badge check">TEST</span>' : '') + '</td><td class="r">' + (r.waist_cm != null ? r.waist_cm : '—') + '</td><td class="r">' + (r.chest_cm != null ? r.chest_cm : '—') + '</td><td class="r">' + (r.arm_cm != null ? r.arm_cm : '—') + '</td></tr>').join('') + '</table>';
+    }
+    html += '</div>';
+    // strength
+    const lifts = MAIN_LIFTS.map((n) => ({ n, h: liftHistory(n) }));
+    html += '<div class="tk-card"><h3>Strength · top set per session</h3><table class="tbl"><tr><th>Lift</th><th class="r">First</th><th class="r">Latest</th><th class="r">e1RM*</th></tr>' +
+      lifts.map((l) => {
+        if (!l.h.length) return '<tr><td>' + escapeHtml(l.n) + '</td><td class="r" colspan="3">' + nd() + '</td></tr>';
+        const f = l.h[0], z = l.h[l.h.length - 1];
+        const ch = l.h.length > 1 ? ((z.e - f.e) / f.e * 100) : null;
+        return '<tr><td>' + escapeHtml(l.n) + '<div class="src">' + l.h.length + ' session' + (l.h.length > 1 ? 's' : '') + '</div></td><td class="r">' + f.t.w + '×' + f.t.r + '<div class="src">' + escapeHtml(prettyDate(f.date).slice(4)) + '</div></td><td class="r">' + z.t.w + '×' + z.t.r + '<div class="src">' + escapeHtml(prettyDate(z.date).slice(4)) + '</div></td><td class="r">' + fmt(z.e, 1) + (ch != null ? '<div class="src ' + (ch >= -10 ? '' : 'warnc') + '">' + (ch >= 0 ? '+' : '') + fmt(ch, 1) + '%</div>' : '') + '</td></tr>';
+      }).join('') + '</table><div class="sub" style="margin-top:8px">*Estimated 1-rep max (Epley: kg × (1 + reps/30)). An estimate for trend only, not a tested max.</div></div>';
+    // assessment summary
+    const w1 = weekStats(1);
+    const cur = wNow >= 2 ? weekStats(Math.min(wNow, 12)) : null;
+    const cmp = (label, a, b, unit, dp, better) => {
+      if (a == null) return row(label, nd(), 'week 1');
+      if (b == null) return row(label, fmt(a, dp) + unit, 'week 1 only');
+      const d = b - a; const cls = better === 0 ? '' : (better < 0 ? d <= 0 : d >= 0) ? 'ok' : 'warnc';
+      return row(label, fmt(b, dp) + unit, 'wk 1 ' + fmt(a, dp) + ' (' + (d >= 0 ? '+' : '') + fmt(d, dp) + ')', cls);
+    };
+    const nextAssess = ASSESS.find((a) => a[1] >= today);
+    const waist1 = waist.find((r) => r.entry_date >= R90.start && r.entry_date <= dAdd(R90.start, 6)) || null;
+    const waistL = waist.length ? waist[waist.length - 1] : null;
+    html += '<div class="tk-card"><h3>Assessment summary' + (nextAssess ? ' · next ' + nextAssess[0] + ', ' + escapeHtml(prettyDate(nextAssess[1]).slice(4)) : '') + '</h3>' +
+      '<div class="sub" style="margin-bottom:8px">Current week compared with the week-1 baseline (24–30 Nov). Fills in as data arrives.</div><div class="kv">' +
+      cmp('Weight avg', w1.weight, cur && cur.weight, ' kg', 1, -1) +
+      cmp('Waist', waist1 ? Number(waist1.waist_cm) : null, waistL && waist1 && waistL.entry_date > waist1.entry_date ? Number(waistL.waist_cm) : null, ' cm', 1, -1) +
+      cmp('Steps', w1.steps, cur && cur.steps, '', 0, 1) +
+      cmp('Sleep', w1.sleep, cur && cur.sleep, ' h', 1, 1) +
+      cmp('Protein', w1.protein, cur && cur.protein, ' g', 0, 1) +
+      lifts.filter((l) => l.h.length).slice(0, 4).map((l) => {
+        const base = l.h.filter((x) => x.date <= dAdd(R90.start, 13))[0];
+        const z = l.h[l.h.length - 1];
+        return base ? cmp(escapeHtml(l.n) + ' e1RM*', base.e, z.date > base.date ? z.e : null, ' kg', 1, 1) : '';
+      }).join('') + '</div></div>';
+    if (tHealth && tHealth.rows && tHealth.rows.length) html += '<p class="hint">“w/s” and hollow dots = from watch/scale (Google Health sync, updated ' + escapeHtml(String(tHealth.updated || '').slice(0, 10)) + '), shown only for days without your own check-in value.</p>';
+    root.innerHTML = html;
+  }
 
   if (sessionStorage.getItem('kairo_pass')) unlock();
 })();
