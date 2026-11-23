@@ -5,9 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0e1116">
+<meta name="theme-color" content="#050505">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <meta name="robots" content="noindex, nofollow">
-<title>KAIRO · Workout log & Ripped 90 tracker</title>
+<title>KAIRO LOG · Project Ripped 90</title>
 <style>
   :root {
     --bg: #0e1116;
@@ -266,14 +269,178 @@
   .pill.next { border-color: var(--accent); color: var(--accent); }
   .pill.done { color: var(--faint); text-decoration: line-through; }
   .src { color: var(--faint); font-size: 11px; font-weight: 600; }
+  /* ===== GVNFIT lab redesign (Nov 2026): black + lime, condensed type ===== */
+  :root {
+    --bg: #050505; --surface: #111111; --card: #141414; --card-2: #1c1c1c;
+    --text: #f2f2f2; --muted: #9a9a9a; --faint: #5e5e5e;
+    --accent: #c8ff1a; --accent-dim: #5d7a00; --accent-bg: #1a2400;
+    --gold: #f2b632; --grey: #8c8c8c; --warn: #ff5a1f; --danger: #ff2e2e;
+    --line: #262626; --input: #0b0b0b;
+    --font: "Barlow", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --cond: "Barlow Condensed", "Oswald", "Arial Narrow", "Roboto Condensed", "Helvetica Neue", Arial, sans-serif;
+  }
+  html, body { background: var(--bg); overflow-x: hidden; }
+  .cond, svg text { font-family: var(--cond); letter-spacing: 0.04em; }
+  .you { color: var(--accent) !important; }
+  .gold { color: var(--gold) !important; }
+  .avg { color: var(--grey) !important; }
+  .amber { color: var(--warn) !important; }
+  .red { color: var(--danger) !important; }
+  #unlock-btn, #save-btn, .btn-primary { color: #000; border-radius: 4px; font-family: var(--cond); font-size: 19px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; min-height: 56px; }
+  #unlock h1 { font-family: var(--cond); font-size: 15px; letter-spacing: 0.24em; }
+  #unlock h2 { font-family: var(--cond); font-size: 40px; text-transform: uppercase; letter-spacing: 0.01em; font-weight: 800; line-height: 1; }
+  #passcode { border-radius: 4px; font-size: 20px; }
+  /* header: lab report */
+  header.app.lab { display: block; margin-bottom: 14px; border-bottom: 1px solid var(--line); padding-bottom: 12px; }
+  header.app.lab .lab-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  header.app.lab .brand { font-family: var(--cond); font-size: 30px; line-height: 0.95; font-weight: 800; letter-spacing: 0.02em; color: var(--text); }
+  header.app.lab .sub { font-family: var(--cond); font-size: 13px; letter-spacing: 0.18em; color: var(--accent); font-weight: 700; margin-top: 3px; }
+  header.app.lab button.link { font-family: var(--cond); text-transform: uppercase; letter-spacing: 0.12em; font-size: 13px; border: 1px solid var(--line); border-radius: 4px; padding: 8px 12px; min-height: 40px; }
+  .lab-meta { display: grid; grid-template-columns: 1.15fr 1fr 0.8fr 1.15fr; gap: 0; margin-top: 12px; border-top: 1px dotted #3a3a3a; padding-top: 8px; }
+  .lab-meta > div { min-width: 0; padding-right: 6px; }
+  .lab-meta .lbl { display: block; font-family: var(--cond); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); font-weight: 700; }
+  .lab-meta .val { display: block; font-family: var(--cond); font-size: 19px; font-weight: 800; letter-spacing: 0.02em; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .lab-meta .val .of { font-size: 12px; color: var(--muted); font-weight: 600; margin-left: 1px; }
+  .lab-meta .val.nd { font-size: 14px; font-style: normal; }
+  /* tabs */
+  .tabs { border-radius: 4px; background: #0b0b0b; margin: 0 0 16px; padding: 3px; gap: 3px; }
+  .tabs button { font-family: var(--cond); text-transform: uppercase; letter-spacing: 0.1em; font-size: 15px; font-weight: 700; border-radius: 3px; min-height: 46px; }
+  .tabs button.on { background: var(--accent); color: #000; }
+  .testbar { background: repeating-linear-gradient(-45deg, #1a0d06 0 10px, #0b0b0b 10px 20px); border-color: var(--warn); border-radius: 4px; font-family: var(--cond); letter-spacing: 0.08em; text-transform: uppercase; font-size: 13px; }
+  /* workout */
+  .seg button { border-radius: 4px; font-family: var(--cond); font-size: 19px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; min-height: 58px; background: var(--surface); }
+  .seg button.on { background: var(--accent); color: #000; border-color: var(--accent); }
+  .seg button .chip { background: var(--gold); color: #000; border-radius: 2px; font-family: var(--cond); letter-spacing: 0.1em; }
+  .seg button.on .chip { background: #000; color: var(--gold); }
+  .seg.legacy button { border-radius: 4px; font-size: 14px; min-height: 40px; }
+  .seg.legacy button.on { background: var(--surface); color: var(--accent); border-color: var(--accent-dim); }
+  .seg.legacy .lbl { font-family: var(--cond); letter-spacing: 0.12em; }
+  .field label, .tk-f label { font-family: var(--cond); font-size: 13px; letter-spacing: 0.14em; color: var(--gold); font-weight: 700; }
+  .field input[type="date"], .tk-f .inp { border-radius: 4px; }
+  .sess-head { border-top: 1px dotted #3a3a3a; border-bottom: 1px dotted #3a3a3a; padding: 10px 0 10px; margin: 4px 0 8px; }
+  .sh-lbl { font-family: var(--cond); color: var(--gold); font-size: 13px; letter-spacing: 0.16em; font-weight: 700; }
+  .sh-big { font-family: var(--cond); font-size: 34px; font-weight: 800; line-height: 1.02; letter-spacing: 0.01em; text-transform: uppercase; }
+  .sh-sub { font-family: var(--cond); color: var(--muted); font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; }
+  .hint strong { color: var(--accent); }
+  .ex { background: var(--card); border-radius: 4px; border-color: var(--line); border-left: 3px solid var(--line); padding: 12px 12px 12px; }
+  .ex:has(.set.done) { border-left-color: var(--accent); }
+  .ex-lbl { font-family: var(--cond); color: var(--gold); font-size: 12px; letter-spacing: 0.18em; font-weight: 700; border-bottom: 1px dotted #333; padding-bottom: 4px; margin-bottom: 6px; }
+  .ex-name { font-family: var(--cond); font-size: 22px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1.05; }
+  .ex-meta { font-family: var(--cond); font-size: 14px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin: 2px 0 8px; }
+  .ex-last { font-size: 13px; margin: 0 0 10px; display: flex; flex-wrap: wrap; gap: 4px 12px; }
+  .ex-last .tg { font-family: var(--cond); color: var(--gold); letter-spacing: 0.08em; font-size: 15px; font-weight: 600; }
+  .ex-last .tg b { color: var(--gold); font-size: 17px; }
+  .ex-last .lt { font-family: var(--cond); color: var(--grey); letter-spacing: 0.06em; font-size: 14.5px; }
+  .ex-last .lt b { color: #c9c9c9; }
+  .mini { border-radius: 3px; font-family: var(--cond); text-transform: uppercase; letter-spacing: 0.08em; font-size: 13px; min-height: 38px; padding: 6px 12px; background: #0b0b0b; }
+  .set-head { font-family: var(--cond); letter-spacing: 0.14em; font-size: 12px; grid-template-columns: 50px minmax(0,1fr) 14px minmax(0,1fr); }
+  .set { grid-template-columns: 50px minmax(0,1fr) 14px minmax(0,1fr); gap: 8px; }
+  .set .n { font-family: var(--cond); font-size: 15px; color: var(--faint); letter-spacing: 0.08em; }
+  .set.done .n { color: var(--accent); font-size: 16px; }
+  .set .inp { min-height: 56px; border-radius: 4px; background: #0b0b0b; }
+  .set .inp input { font-family: var(--cond); font-size: 26px; font-weight: 700; letter-spacing: 0.02em; padding: 8px 0; }
+  .set .inp input::placeholder { color: #4b4b4b; font-style: normal; font-weight: 600; }
+  .set .inp.filled { background: #0e1400; border-color: var(--accent-dim); }
+  .set .inp.auto input { color: #a8a8a8; }
+  .set .inp.bad, .tk-f .inp.bad { background: #200606; border-color: var(--danger); }
+  .set-msg { margin-left: 58px; }
+  .ex-notes, #session-notes, .tk-notes { border-radius: 4px; }
+  .block, .tk-card { border-radius: 4px; background: var(--card); }
+  .block h3, .tk-card h3, .hist h3 { font-family: var(--cond); color: var(--gold); letter-spacing: 0.16em; font-size: 14px; border-bottom: 1px dotted #333; padding-bottom: 6px; }
+  .slider-row input[type="range"] { accent-color: var(--accent); }
+  .slider-row .val { font-family: var(--cond); font-size: 22px; }
+  .hist-item { border-radius: 4px; background: var(--surface); }
+  .hist-item .when { font-family: var(--cond); font-size: 17px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .hist-item .edit { font-family: var(--cond); letter-spacing: 0.1em; text-transform: uppercase; }
+  .badge { border-radius: 2px; font-family: var(--cond); }
+  .badge.check { background: #1f0d05; color: var(--warn); border-color: var(--warn); }
+  .banner { border-radius: 4px; }
+  .banner.edit { border-color: var(--gold); background: #1c1505; }
+  .banner.ok { background: var(--accent-bg); color: #e6ffb0; }
+  .banner.bad { background: #200606; }
+  .toast { background: var(--accent); color: #000; border-color: var(--accent); border-radius: 4px; font-family: var(--cond); letter-spacing: 0.08em; text-transform: uppercase; }
+  .dock { background: linear-gradient(to top, var(--bg) 72%, transparent); }
+  /* forms: steppers + chips */
+  .tk-grid .tk-f.full, .tk-grid .tk-f:has(.chips) { grid-column: 1 / -1; }
+  .stepper { display: grid; grid-template-columns: 56px minmax(0, 1fr) 56px; gap: 6px; }
+  .stp { background: #0b0b0b; border: 1px solid var(--line); border-radius: 4px; min-height: 56px; font-size: 26px; font-weight: 600; color: var(--accent); line-height: 1; }
+  .stp:active { background: var(--accent); color: #000; }
+  .tk-f .inp { min-height: 56px; }
+  .tk-f input, .tk-f select { font-family: var(--cond); font-size: 24px; font-weight: 700; text-align: center; }
+  .tk-f input[type=date], .tk-f input[type=time] { font-size: 20px; text-align: left; }
+  .tk-f .inp.filled { background: #0e1400; border-color: var(--accent-dim); }
+  .tk-f input::placeholder { color: #4b4b4b; font-style: normal; font-weight: 600; }
+  .tk-f .u { font-family: var(--cond); letter-spacing: 0.08em; font-size: 13px; text-transform: uppercase; }
+  .tk-f .src { color: var(--faint); font-weight: 600; letter-spacing: 0.06em; }
+  .pick button { border-radius: 4px; min-height: 52px; font-family: var(--cond); font-size: 20px; background: #0b0b0b; }
+  .pick button.on { background: var(--accent); color: #000; border-color: var(--accent); }
+  .pick.chips { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .pick.chips button { font-size: 16px; text-transform: uppercase; letter-spacing: 0.06em; min-height: 48px; }
+  .inp.sr { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); min-height: 0 !important; padding: 0 !important; border: 0 !important; }
+  /* lab report: progress */
+  .lab-sec { display: flex; align-items: baseline; gap: 10px; margin: 22px 0 10px; font-family: var(--cond); }
+  .lab-sec span { color: var(--gold); font-weight: 800; font-size: 15px; letter-spacing: 0.2em; white-space: nowrap; }
+  .lab-sec em { font-style: normal; color: var(--muted); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .lab-sec::after { content: ""; flex: 1; border-bottom: 1px dotted #444; transform: translateY(-4px); min-width: 12px; }
+  .m-lbl { font-family: var(--cond); color: var(--gold); font-weight: 700; letter-spacing: 0.18em; font-size: 13px; border-bottom: 1px solid #262626; padding-bottom: 5px; margin-bottom: 8px; }
+  .m-lbl.warnl { color: var(--warn); border: 0; }
+  .ro3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-bottom: 8px; }
+  .ro { min-width: 0; }
+  .ro-l { font-family: var(--cond); font-size: 12px; font-weight: 700; letter-spacing: 0.16em; }
+  .ro-v { font-family: var(--cond); font-size: 40px; font-weight: 800; line-height: 1; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ro-v small { font-size: 13px; font-weight: 600; margin-left: 2px; letter-spacing: 0.06em; color: var(--muted); }
+  .ro-s { font-family: var(--cond); font-size: 12px; color: var(--muted); letter-spacing: 0.08em; margin-top: 2px; text-transform: uppercase; }
+  .nodata { font-family: var(--cond); font-size: 15px; color: var(--faint); letter-spacing: 0.14em; font-weight: 700; font-style: normal; white-space: nowrap; }
+  .meter .ro-v { font-size: 32px; }
+  .tk-card .sub { font-size: 12.5px; color: var(--muted); }
+  .tk-card .sub.center { text-align: center; font-family: var(--cond); letter-spacing: 0.1em; font-size: 12px; }
+  .gauge { max-width: 300px; margin: 0 auto; }
+  .legend { font-family: var(--cond); letter-spacing: 0.08em; font-size: 12px; text-transform: uppercase; }
+  .legend i { border-radius: 2px; }
+  .pills { margin-top: 8px; }
+  .pill { border-radius: 2px; font-family: var(--cond); letter-spacing: 0.08em; font-size: 12px; }
+  .pill.gold { color: var(--gold); border-color: #5a4512; }
+  .pill.next { border-color: var(--accent); color: var(--accent); }
+  .hazard { border: 1px solid var(--warn); border-radius: 4px; overflow: hidden; margin: 4px 0 12px; background: #0b0b0b; }
+  .hazard.red { border-color: var(--danger); }
+  .hz-top { height: 14px; background: repeating-linear-gradient(-45deg, var(--warn) 0 10px, #000 10px 20px); }
+  .hazard.red .hz-top { background: repeating-linear-gradient(-45deg, var(--danger) 0 10px, #000 10px 20px); }
+  .hz-body { padding: 10px 12px 12px; }
+  .hz-row { display: flex; justify-content: space-between; align-items: flex-end; }
+  .hz-big { font-family: var(--cond); font-size: 56px; font-weight: 800; line-height: 0.9; color: var(--text); }
+  .hz-btn { font-family: var(--cond); font-weight: 800; letter-spacing: 0.1em; color: var(--warn); border: 2px solid var(--warn); border-radius: 4px; padding: 6px 12px; font-size: 15px; }
+  .hazard.red .hz-btn { color: var(--danger); border-color: var(--danger); }
+  .hz-item { border-top: 1px dotted #333; margin-top: 8px; padding-top: 8px; font-size: 13px; color: var(--muted); }
+  .hz-item b { display: block; font-family: var(--cond); color: var(--text); letter-spacing: 0.1em; font-size: 15px; }
+  .lift-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .lift-grid .tk-card { margin: 0; padding: 10px; }
+  .lift .m-lbl { font-size: 11.5px; letter-spacing: 0.1em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .lift-v { font-family: var(--cond); font-size: 30px; font-weight: 800; line-height: 1; white-space: nowrap; }
+  .lift-v small { font-size: 12px; color: var(--muted); margin: 0 2px; }
+  .lift .ro-s { font-size: 11px; }
+  .tbl.lab { font-family: var(--cond); font-size: 14px; }
+  .tbl.lab th { font-family: var(--cond); color: var(--gold); letter-spacing: 0.1em; font-size: 11.5px; padding-right: 4px; }
+  .tbl.lab td { padding: 7px 4px 7px 0; border-top: 1px dotted #2f2f2f; }
+  .tbl.lab sup { font-size: 8px; color: var(--faint); }
+  .kv { font-family: var(--cond); font-size: 15px; letter-spacing: 0.03em; }
+  .kv .k { color: var(--muted); letter-spacing: 0.06em; }
+  .kv .t { font-size: 12.5px; }
+  .kv .v.amber { color: var(--warn); }
+  #tab-progress .hint { font-size: 12px; }
+  @media (max-width: 360px) { .ro-v { font-size: 32px; } .lab-meta .val { font-size: 16px; } .sh-big { font-size: 28px; } }
+  .lab-meta .val .of2 { display: block; font-size: 10.5px; color: var(--muted); font-weight: 600; letter-spacing: 0.08em; line-height: 1.2; }
+  .nd { font-style: normal; font-family: var(--cond); letter-spacing: 0.08em; }
+  #tab-progress > .sub { font-size: 12px; color: var(--muted); margin: 6px 0 0; line-height: 1.4; }
+  .pick button[data-v=""].on, .pick button[data-ct=""].on { background: #1e1e1e; color: var(--muted); border-color: #444; }
+  #suggest-hint:empty { display: none; }
 </style>
 </head>
 <body>
 <div id="toast" class="toast"></div>
 
 <section id="unlock">
-  <h1>KAIRO</h1>
-  <h2>Workout log</h2>
+  <h1>KAIRO LOG</h1>
+  <h2>Project Ripped 90</h2>
   <p>Enter your passcode to log today’s session. Your training data stays private.</p>
   <div class="row">
     <input id="passcode" type="password" inputmode="text" autocomplete="current-password" autocapitalize="off" spellcheck="false" placeholder="Passcode" enterkeyhint="go">
@@ -284,15 +451,23 @@
 
 <section id="app" class="hidden">
   <div class="wrap">
-    <header class="app">
-      <div>
-        <div class="brand">KAIRO</div>
-        <div class="sub">Workout log · Ripped 90 tracker</div>
+    <header class="app lab">
+      <div class="lab-top">
+        <div>
+          <div class="brand">KAIRO LOG</div>
+          <div class="sub">PROJECT RIPPED 90 · GVNFIT</div>
+        </div>
+        <button type="button" class="link" id="lock-btn">Lock</button>
       </div>
-      <button type="button" class="link" id="lock-btn">Lock</button>
+      <div class="lab-meta">
+        <div><span class="lbl">Date</span><span class="val" id="h-date">—</span></div>
+        <div><span class="lbl">Athlete</span><span class="val you">VIKRAM</span></div>
+        <div><span class="lbl">Week</span><span class="val" id="h-week">—</span></div>
+        <div><span class="lbl">Readiness</span><span class="val nd" id="h-ready" title="">—</span></div>
+      </div>
     </header>
 
-    <div class="testbar hidden" id="testbar">TEST MODE · check-ins saved here are test rows and never reach the planner</div>
+    <div class="testbar hidden" id="testbar">TEST MODE · workouts and check-ins saved here are test rows and never reach the planner</div>
     <nav class="tabs" id="tabs">
       <button type="button" data-tab="workout">Workout</button>
       <button type="button" data-tab="daily">Daily</button>
@@ -311,6 +486,7 @@
         <input id="session-date" type="date">
       </div>
     </div>
+    <div class="sess-head" id="sess-head"></div>
     <p class="hint" id="suggest-hint"></p>
     <div class="banner hidden" id="form-banner" role="status" aria-live="polite"></div>
 
@@ -535,7 +711,7 @@
   /* ---------- history lookups ---------- */
 
   function realSessions() {
-    return (history || []).filter((s) => !s.is_test);
+    return (history || []).filter((s) => TEST || !s.is_test);
   }
   function lastFor(ex, excludeKey) {
     const names = [ex.log_name, ex.name].filter(Boolean);
@@ -634,13 +810,27 @@
     const sess = sessionDef(currentType);
     const why = suggested && suggested.type === currentType ? suggested.reason : (sess ? ('Default ' + sess.default_day) : '');
     $('suggest-hint').innerHTML = sess
-      ? '<strong>' + currentType + '</strong> · ' + escapeHtml(sess.subtitle) + (why ? ' · ' + escapeHtml(why) : '')
+      ? (why ? '<strong>' + escapeHtml(currentType) + '</strong> · ' + escapeHtml(why) : '')
       : '';
+    renderSessHead(sess);
     const root = $('exercises');
     root.innerHTML = '';
     const key = $('session-date').value + '|' + currentType;
     (sess ? sess.exercises : []).forEach((ex, i) => root.appendChild(exerciseCard(ex, i, key)));
     renderHistory();
+  }
+
+  function renderSessHead(sess) {
+    const el = $('sess-head'); if (!el) return;
+    const date = $('session-date').value;
+    if (!R90_TYPES.includes(currentType)) { el.innerHTML = '<div class="sh-lbl">OLD PPL · LOGGING ONLY</div><div class="sh-big">' + escapeHtml(currentType.toUpperCase()) + '</div>'; return; }
+    const done = realSessions().filter((s) => R90_TYPES.includes(s.session_type) && s.session_date >= R90.start && (s.exercises || []).some((e) => (e.sets || []).length));
+    const saved = done.find((s) => s.session_date === date && s.session_type === currentType);
+    const n = done.filter((s) => s.session_date < date || (s.session_date === date && s !== saved && saved == null)).length + 1;
+    const w = progWeek(date || todayIST());
+    el.innerHTML = '<div class="sh-lbl">' + (w ? 'WEEK ' + String(w).padStart(2, '0') + ' · ' : 'PRE-START · ') + escapeHtml(prettyDate(date || todayIST()).toUpperCase()) + (TEST ? ' · TEST' : '') + '</div>' +
+      '<div class="sh-big">SESSION <span class="you">' + String(n).padStart(2, '0') + '</span> · ' + escapeHtml(currentType.toUpperCase()) + '</div>' +
+      (sess ? '<div class="sh-sub">' + escapeHtml(sess.subtitle) + ' · ' + (sess.exercises || []).length + ' EXERCISES</div>' : '');
   }
 
   function exerciseCard(ex, idx, key) {
@@ -652,11 +842,11 @@
     const tgt = numericTarget(ex);
     let lastHtml;
     if (tgt) {
-      lastHtml = 'Target: <b>' + escapeHtml(tgt) + ' kg</b>';
-      if (last) lastHtml += ' · Last ' + escapeHtml(prettyDate(last.date)) + ': ' + escapeHtml(last.sets.map((s) => fmtSet(s, ex)).join(', '));
+      lastHtml = '<span class="tg">TARGET <b>' + escapeHtml(tgt) + ' kg</b></span>';
+      if (last) lastHtml += ' <span class="lt">LAST ' + escapeHtml(prettyDate(last.date).toUpperCase()) + ' ' + escapeHtml(last.sets.map((s) => fmtSet(s, ex)).join(', ')) + '</span>';
     } else if (last) {
       const bad = last.sets.some((s) => setLooksWrong(s, ex));
-      lastHtml = 'Last ' + escapeHtml(prettyDate(last.date)) + ': <b>' + escapeHtml(last.sets.map((s) => fmtSet(s, ex)).join(', ')) + '</b>' +
+      lastHtml = '<span class="lt">LAST ' + escapeHtml(prettyDate(last.date).toUpperCase()) + ' <b>' + escapeHtml(last.sets.map((s) => fmtSet(s, ex)).join(', ')) + '</b></span>' +
         (bad ? ' <span class="warnt">· looks wrong, fix in history</span>' : '');
     } else if (k === 'band') {
       lastHtml = 'Light band or plate. Add reps before weight.';
@@ -683,7 +873,7 @@
     }
     const range = ex.sets + ' sets × ' + rangeText(ex) + ' · rest ' + ex.rest;
     el.innerHTML =
-      '<div class="ex-head"><div class="ex-name">' + escapeHtml(ex.name) + '</div></div>' +
+      '<div class="ex-lbl">EXERCISE ' + String(idx + 1).padStart(2, '0') + '</div><div class="ex-head"><div class="ex-name">' + escapeHtml(ex.name) + '</div></div>' +
       '<div class="ex-meta">' + escapeHtml(range) + '</div>' +
       '<div class="ex-last">' + lastHtml + '</div>' +
       '<div class="ex-tools">' +
@@ -840,6 +1030,7 @@
         action: 'save',
         session_date: $('session-date').value,
         session_type: currentType,
+      is_test: TEST,
         exercises,
         energy: energyTouched ? Number($('energy').value) : null,
         soreness: sorenessTouched ? Number($('soreness').value) : null,
@@ -1082,19 +1273,19 @@
   const R90_TYPES = ['Lower A', 'Upper B', 'Lower B', 'Upper A'];
   const CARDIO_TYPES = ['Incline walk', 'Cycling', 'Elliptical', 'Other'];
   const DAILY_FIELDS = [
-    { k: 'weight_kg', label: 'Morning weight', unit: 'kg', min: 30, max: 250, int: false, ph: 'e.g. 92.4' },
-    { k: 'calories', label: 'Calories', unit: 'kcal', min: 0, max: 8000, int: true, ph: '2200' },
-    { k: 'protein_g', label: 'Protein', unit: 'g', min: 0, max: 500, int: true, ph: '175' },
-    { k: 'steps', label: 'Steps', unit: '', min: 0, max: 100000, int: true, ph: '8000' },
-    { k: 'sleep_hours', label: 'Sleep', unit: 'h', min: 0, max: 16, int: false, ph: '7.5' },
-    { k: 'cardio_min', label: 'Cardio', unit: 'min', min: 0, max: 300, int: true, ph: '20' },
+    { k: 'weight_kg', step: 0.1, label: 'Morning weight', unit: 'kg', min: 30, max: 250, int: false, ph: 'e.g. 92.4' },
+    { k: 'calories', step: 50, label: 'Calories', unit: 'kcal', min: 0, max: 8000, int: true, ph: '2200' },
+    { k: 'protein_g', step: 5, label: 'Protein', unit: 'g', min: 0, max: 500, int: true, ph: '175' },
+    { k: 'steps', step: 500, label: 'Steps', unit: '', min: 0, max: 100000, int: true, ph: '8000' },
+    { k: 'sleep_hours', step: 0.25, label: 'Sleep', unit: 'h', min: 0, max: 16, int: false, ph: '7.5' },
+    { k: 'cardio_min', step: 5, label: 'Cardio', unit: 'min', min: 0, max: 300, int: true, ph: '20' },
     { k: 'bedtime', label: 'Bedtime', type: 'time' },
     { k: 'wake_time', label: 'Wake time', type: 'time' },
   ];
   const WEEKLY_FIELDS = [
-    { k: 'waist_cm', label: 'Waist at navel', unit: 'cm', min: 50, max: 200, int: false, ph: 'e.g. 91.4' },
-    { k: 'chest_cm', label: 'Chest', unit: 'cm', min: 50, max: 200, int: false, ph: 'every 2 wks' },
-    { k: 'arm_cm', label: 'Arm', unit: 'cm', min: 15, max: 70, int: false, ph: 'every 2 wks' },
+    { k: 'waist_cm', step: 0.5, base: 91.4, label: 'Waist at navel', unit: 'cm', min: 50, max: 200, int: false, ph: 'e.g. 91.4' },
+    { k: 'chest_cm', step: 0.5, label: 'Chest', unit: 'cm', min: 50, max: 200, int: false, ph: 'every 2 wks' },
+    { k: 'arm_cm', step: 0.5, label: 'Arm', unit: 'cm', min: 15, max: 70, int: false, ph: 'every 2 wks' },
   ];
   let tDaily = [], tWeekly = [], tHealth = null, tab = sessionStorage.getItem('kairo_tab') || 'workout';
   const picks = { energy: null, soreness: null, wrathx: null, photo_front: null, photo_side: null, photo_back: null };
@@ -1124,6 +1315,7 @@
       date, manual: !!dailyFor(date),
       weight: pick('weight_kg', 'weight_kg'), steps: pick('steps', 'steps'), sleep: pick('sleep_hours', 'sleep_hours'),
       bedtime: m.bedtime ? { v: m.bedtime, src: 'log' } : (h.sleep_start ? { v: h.sleep_start, src: 'watch' } : { v: null, src: null }),
+      wake: m.wake_time ? { v: m.wake_time, src: 'log' } : (h.sleep_end ? { v: h.sleep_end, src: 'watch' } : { v: null, src: null }),
       calories: m.calories != null ? Number(m.calories) : null, protein: m.protein_g != null ? Number(m.protein_g) : null,
       cardio: m.cardio_min != null && Number(m.cardio_min) > 0, training: workoutsOn(date).length > 0,
     };
@@ -1144,6 +1336,7 @@
 
   function trackerLoad(data) {
     tDaily = data.daily || []; tWeekly = data.weekly || []; tHealth = data.health || null;
+    renderHeader();
     setTab(tab);
   }
 
@@ -1153,8 +1346,28 @@
     let control;
     if (f.type === 'time') control = '<input id="' + id + '" type="time">';
     else control = '<input id="' + id + '" inputmode="' + (f.int ? 'numeric' : 'decimal') + '" autocomplete="off" placeholder="' + escapeHtml(f.ph || '') + '">';
-    return '<div class="tk-f"><label for="' + id + '">' + escapeHtml(f.label) + (f.min != null ? ' <span class="src">' + f.min + '–' + fmt(f.max) + '</span>' : '') + '</label>' +
-      '<div class="inp">' + control + (f.unit ? '<span class="u">' + f.unit + '</span>' : '') + '</div><div class="msg" id="' + id + '-msg"></div></div>';
+    return '<div class="tk-f' + (f.step ? ' full' : '') + '"><label for="' + id + '">' + escapeHtml(f.label) + (f.min != null ? ' <span class="src">' + f.min + '–' + fmt(f.max) + '</span>' : '') + '</label>' +
+      (f.step ? '<div class="stepper"><button type="button" class="stp" data-stp="' + id + '" data-d="-1" aria-label="Decrease ' + escapeHtml(f.label) + '">−</button>' : '') +
+      '<div class="inp">' + control + (f.unit ? '<span class="u">' + f.unit + '</span>' : '') + '</div>' +
+      (f.step ? '<button type="button" class="stp" data-stp="' + id + '" data-d="1" aria-label="Increase ' + escapeHtml(f.label) + '">+</button></div>' : '') +
+      '<div class="msg" id="' + id + '-msg"></div></div>';
+  }
+  // +/- steppers: start from the typed value, else the last value you logged for that field, else the placeholder target.
+  function bindSteppers(root, fields, prefix, rows) {
+    root.querySelectorAll('[data-stp]').forEach((b) => b.addEventListener('click', () => {
+      const id = b.dataset.stp; const f = fields.find((x) => prefix + x.k === id); const el = $(id);
+      let cur = parseFloat(String(el.value).replace(',', '.'));
+      if (!isFinite(cur)) {
+        const prev = (visible(rows()) || []).find((r) => r[f.k] != null);
+        cur = prev ? Number(prev[f.k]) : (f.k === 'weight_kg' ? (latest((x) => x.weight, todayIST(), 14) || {}).v : (f.base != null ? f.base : parseFloat(f.ph)));
+        if (cur == null || !isFinite(cur)) return;
+        if (prev || f.k === 'weight_kg') cur -= Number(b.dataset.d) * f.step;
+      }
+      let n = cur + Number(b.dataset.d) * f.step;
+      n = Math.min(Math.max(n, f.min), f.max);
+      el.value = f.int ? String(Math.round(n)) : String(Math.round(n * 100) / 100);
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+    }));
   }
   function checkNum(f, raw) {
     const s = String(raw == null ? '' : raw).trim().replace(',', '.');
@@ -1208,7 +1421,7 @@
       '<div class="tk-f" style="margin-bottom:12px"><label for="d-date">Date</label><div class="inp"><input id="d-date" type="date"></div></div>' +
       '<div class="banner hidden" id="d-banner"></div>' +
       '<div class="tk-grid">' + DAILY_FIELDS.slice(0, 5).map((f) => fieldHtml(f, 'd-')).join('') +
-      '<div class="tk-f"><label for="d-cardio_type">Cardio type</label><div class="inp"><select id="d-cardio_type"><option value="">None</option>' + CARDIO_TYPES.map((t) => '<option>' + t + '</option>').join('') + '</select></div><div class="msg" id="d-cardio_type-msg"></div></div>' +
+      '<div class="tk-f full"><label for="d-cardio_type">Cardio type</label><div class="pick chips" id="d-cardio-chips">' + ['', ...CARDIO_TYPES].map((t) => '<button type="button" data-ct="' + t + '">' + (t || 'None') + '</button>').join('') + '</div><div class="inp sr"><select id="d-cardio_type" tabindex="-1" aria-hidden="true"><option value="">None</option>' + CARDIO_TYPES.map((t) => '<option>' + t + '</option>').join('') + '</select></div><div class="msg" id="d-cardio_type-msg"></div></div>' +
       DAILY_FIELDS.slice(5).map((f) => fieldHtml(f, 'd-')).join('') + '</div>' +
       '<div class="tk-f" style="margin-top:12px"><label>Energy (1–5)</label>' + pickHtml('energy', [[1, '1'], [2, '2'], [3, '3'], [4, '4'], [5, '5']]) + '</div>' +
       '<div class="tk-f" style="margin-top:12px"><label>Soreness (1–5)</label>' + pickHtml('soreness', [[1, '1'], [2, '2'], [3, '3'], [4, '4'], [5, '5']]) + '</div>' +
@@ -1220,6 +1433,8 @@
     bindPicks(root);
     $('d-date').value = todayIST();
     $('d-date').addEventListener('change', fillDaily);
+    bindSteppers(root, DAILY_FIELDS, 'd-', () => tDaily);
+    root.querySelectorAll('[data-ct]').forEach((b) => b.addEventListener('click', () => { $('d-cardio_type').value = b.dataset.ct; paintCardio(); $('d-cardio_type-msg').textContent = ''; }));
     root.querySelectorAll('input:not([type=date]), select').forEach((el) => el.addEventListener('input', () => validateFields(DAILY_FIELDS, 'd-')));
     $('d-save').addEventListener('click', saveDaily);
   }
@@ -1228,6 +1443,7 @@
     const r = dailyFor(date);
     DAILY_FIELDS.forEach((f) => setVal('d-' + f.k, r ? r[f.k] : null));
     setVal('d-cardio_type', r ? r.cardio_type : '');
+    paintCardio();
     setVal('d-notes', r ? r.notes : '');
     picks.energy = r ? r.energy : null; picks.soreness = r ? r.soreness : null; picks.wrathx = r ? r.wrathx : null;
     paintPicks($('tab-daily'));
@@ -1237,6 +1453,7 @@
     b.innerHTML = r ? '<b>Editing ' + escapeHtml(prettyDate(date)) + '</b> (already saved). Saving replaces it.' : '';
     $('d-status').textContent = '';
   }
+  function paintCardio() { const v = $('d-cardio_type').value; document.querySelectorAll('[data-ct]').forEach((b) => b.classList.toggle('on', b.dataset.ct === v)); }
   function renderDaily() {
     buildDaily(); fillDaily();
     const rows = visible(tDaily).slice(0, 14);
@@ -1265,7 +1482,7 @@
     $('d-save').disabled = true; st.className = 'status'; st.textContent = 'Saving…';
     try {
       const res = await api(payload);
-      tDaily = res.daily || tDaily; tWeekly = res.weekly || tWeekly;
+      tDaily = res.daily || tDaily; tWeekly = res.weekly || tWeekly; renderHeader();
       st.className = 'status ok'; st.textContent = '✓ Saved ' + prettyDate(date) + (TEST ? ' (test)' : '');
       toast('Check-in saved'); renderDaily(); st.className = 'status ok'; st.textContent = '✓ Saved ' + prettyDate(date) + (TEST ? ' (test)' : '');
     } catch (e) {
@@ -1294,6 +1511,7 @@
     bindPicks(root);
     $('w-date').value = todayIST();
     $('w-date').addEventListener('change', fillWeekly);
+    bindSteppers(root, WEEKLY_FIELDS, 'w-', () => tWeekly);
     root.querySelectorAll('input:not([type=date])').forEach((el) => el.addEventListener('input', () => validateFields(WEEKLY_FIELDS, 'w-')));
     $('w-save').addEventListener('click', saveWeekly);
   }
@@ -1341,7 +1559,7 @@
     $('w-save').disabled = true; st.className = 'status'; st.textContent = 'Saving…';
     try {
       const res = await api(payload);
-      tDaily = res.daily || tDaily; tWeekly = res.weekly || tWeekly;
+      tDaily = res.daily || tDaily; tWeekly = res.weekly || tWeekly; renderHeader();
       toast('Measurements saved'); renderWeekly();
       $('w-status').className = 'status ok'; $('w-status').textContent = '✓ Saved ' + prettyDate(date) + (TEST ? ' (test)' : '');
     } catch (e) {
@@ -1349,7 +1567,9 @@
     } finally { $('w-save').disabled = false; }
   }
 
-  /* ---------- progress dashboard ---------- */
+  /* ---------- progress dashboard: TEST RESULTS ---------- */
+  const C = { lime: '#c8ff1a', gold: '#f2b632', grey: '#8c8c8c', warn: '#ff5a1f', red: '#ff2e2e', line: '#2a2a2a', faint: '#3a3a3a', text: '#f2f2f2' };
+  let svgN = 0;
   function topSet(sets) {
     let best = null;
     for (const s of sets || []) {
@@ -1362,8 +1582,8 @@
   function e1rm(t) { return t ? t.w * (1 + t.r / 30) : null; }
   function liftHistory(name) {
     const out = [];
-    const sess = realSessions().filter((s) => !s.is_test).slice().sort((a, b) => a.session_date < b.session_date ? -1 : 1);
-    for (const s of sess) for (const e of s.exercises || []) if (e.name === name) { const t = topSet(e.sets); if (t) out.push({ date: s.session_date, t, e: e1rm(t) }); }
+    const sess = realSessions().slice().sort((a, b) => a.session_date < b.session_date ? -1 : 1);
+    for (const s of sess) for (const e of s.exercises || []) if (e.name === name) { const t = topSet(e.sets); if (t) out.push({ date: s.session_date, t, e: e1rm(t), test: !!s.is_test }); }
     return out;
   }
   function weightSeries(from, to) {
@@ -1375,53 +1595,12 @@
     const win = pts.filter((p) => dDiff(date, p.d) >= 0 && dDiff(date, p.d) < 7);
     return win.length >= 3 ? avg(win.map((p) => p.v)) : null;
   }
-  function weightChart(today) {
-    const from = dAdd(R90.start, -21), to = R90.end;
-    const pts = weightSeries(from, today < to ? today : to);
-    if (!pts.length) return '<div class="tk-card"><h3>Weight</h3>' + nd('No weight data yet.') + '</div>';
-    const W = 340, H = 190, L = 30, Rr = 8, T = 10, B = 22;
-    const span = dDiff(to, from);
-    const vals = pts.map((p) => p.v).concat([R90.baseW, R90.targetLo - 1.5]);
-    const yMin = Math.floor(Math.min.apply(null, vals) - 0.5), yMax = Math.ceil(Math.max.apply(null, vals) + 0.5);
-    const X = (d) => L + (W - L - Rr) * dDiff(d, from) / span;
-    const Y = (v) => T + (H - T - B) * (yMax - v) / (yMax - yMin);
-    let svg = '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Weight trend">';
-    for (let v = yMin; v <= yMax; v += (yMax - yMin > 8 ? 2 : 1)) svg += '<line x1="' + L + '" x2="' + (W - Rr) + '" y1="' + Y(v) + '" y2="' + Y(v) + '" stroke="#232b39" stroke-width="1"/><text x="' + (L - 4) + '" y="' + (Y(v) + 3) + '" fill="#5c6678" font-size="9" text-anchor="end">' + v + '</text>';
-    const endW = dDiff(R90.end, R90.start) / 7;
-    const band = [[R90.start, R90.baseW, R90.baseW], [R90.end, R90.baseW - 0.4 * endW, R90.baseW - 0.7 * endW]];
-    svg += '<polygon points="' + X(band[0][0]) + ',' + Y(band[0][1]) + ' ' + X(band[1][0]) + ',' + Y(band[1][1]) + ' ' + X(band[1][0]) + ',' + Y(band[1][2]) + ' ' + X(band[0][0]) + ',' + Y(band[0][2]) + '" fill="#3dbe9a" fill-opacity="0.12" stroke="#3dbe9a" stroke-opacity="0.35" stroke-dasharray="3 3"/>';
-    svg += '<rect x="' + X(dAdd(R90.end, -6)) + '" width="' + (X(R90.end) - X(dAdd(R90.end, -6))) + '" y="' + Y(R90.targetHi) + '" height="' + (Y(R90.targetLo) - Y(R90.targetHi)) + '" fill="#e6b84d" fill-opacity="0.35"/>';
-    svg += '<line x1="' + X(R90.start) + '" x2="' + X(R90.start) + '" y1="' + T + '" y2="' + (H - B) + '" stroke="#5c6678" stroke-dasharray="2 3"/>';
-    if (today >= from && today <= to) svg += '<line x1="' + X(today) + '" x2="' + X(today) + '" y1="' + T + '" y2="' + (H - B) + '" stroke="#8b95a8" stroke-opacity="0.5"/>';
-    const segs = []; let seg = [];
-    for (let d = pts[0].d; d <= pts[pts.length - 1].d; d = dAdd(d, 1)) {
-      const a = trailingAvg(pts, d);
-      if (a != null) seg.push(X(d).toFixed(1) + ',' + Y(a).toFixed(1)); else if (seg.length) { segs.push(seg); seg = []; }
-    }
-    if (seg.length) segs.push(seg);
-    const path = segs.map((g) => 'M' + g.join(' L')).join(' ');
-    if (path) svg += '<path d="' + path + '" fill="none" stroke="#3dbe9a" stroke-width="2"/>';
-    for (const p of pts) svg += '<circle cx="' + X(p.d).toFixed(1) + '" cy="' + Y(p.v).toFixed(1) + '" r="2.4" fill="' + (p.src === 'log' ? '#eef1f6' : 'none') + '" stroke="' + (p.src === 'log' ? '#eef1f6' : '#8b95a8') + '" stroke-width="1"/>';
-    [[from, prettyDate(from).slice(4)], [R90.start, '24 Nov'], ['2026-12-21', 'Wk 4'], ['2027-01-18', 'Wk 8'], [R90.end, '15 Feb']].forEach((t) => {
-      svg += '<text x="' + X(t[0]) + '" y="' + (H - 6) + '" fill="#5c6678" font-size="9" text-anchor="' + (t[0] === R90.end ? 'end' : t[0] === from ? 'start' : 'middle') + '">' + t[1] + '</text>';
-    });
-    svg += '</svg>';
-    const last = pts[pts.length - 1];
-    const a7 = trailingAvg(pts, last.d);
-    const wNow = progWeek(today);
-    const exp = wNow > 0 ? [R90.baseW - 0.7 * dDiff(today, R90.start) / 7, R90.baseW - 0.4 * dDiff(today, R90.start) / 7] : null;
-    const status = a7 == null || !exp ? '' : a7 > exp[1] + 0.05 ? ' <span class="warnc">above the band</span>' : a7 < exp[0] - 0.05 ? ' <span class="warnc">below the band (losing fast)</span>' : ' <span class="ok">inside the band</span>';
-    return '<div class="tk-card"><h3>Weight · 7-day average</h3><div class="big">' + (a7 != null ? fmt(a7, 1) + ' kg' : nd('need 3 weigh-ins in 7 days')) + '</div>' +
-      '<div class="sub">Latest ' + fmt(last.v, 2) + ' kg on ' + escapeHtml(prettyDate(last.d)) + (last.src === 'watch' ? ' <span class="src">from watch/scale</span>' : '') +
-      (exp ? ' · expected today ' + fmt(exp[0], 1) + '–' + fmt(exp[1], 1) + ' kg' + status : ' · band starts 24 Nov from ' + R90.baseW + ' kg') + '</div>' + svg +
-      '<div class="legend"><span><i style="background:#3dbe9a"></i>7-day average</span><span><i style="background:#eef1f6"></i>Your log</span><span><i style="border:1px solid #8b95a8"></i>From watch/scale</span><span><i style="background:#3dbe9a;opacity:.3"></i>0.4–0.7 kg/week band</span><span><i style="background:#e6b84d;opacity:.6"></i>86–88 kg target</span></div></div>';
-  }
   function weekStats(w) {
     const ws = weekStart(w), we = dAdd(ws, 6);
     const days = []; for (let d = ws; d <= we; d = dAdd(d, 1)) days.push(day(d));
     const kc = days.filter((x) => x.calories != null);
     const calT = kc.length ? avg(kc.map((x) => x.training ? 2300 : 2070)) : null;
-    const sess = realSessions().filter((s) => !s.is_test && s.session_date >= ws && s.session_date <= we && R90_TYPES.includes(s.session_type) && (s.exercises || []).some((e) => (e.sets || []).length)).length;
+    const sess = realSessions().filter((s) => s.session_date >= ws && s.session_date <= we && R90_TYPES.includes(s.session_type) && (s.exercises || []).some((e) => (e.sets || []).length)).length;
     const cardio = days.filter((x) => x.cardio).length;
     const bt = avg(days.map((x) => mins(x.bedtime.v)));
     return {
@@ -1434,99 +1613,343 @@
       bed: bt, bedWatch: days.some((x) => x.bedtime.src === 'watch'), sess, cardio, manual: days.filter((x) => x.manual).length,
     };
   }
-  function row(k, v, t, cls) { return '<div class="k">' + k + '</div><div class="v ' + (cls || '') + '">' + v + '</div><div class="t">' + t + '</div>'; }
-  function weekCard(s, today) {
-    const st = stepTarget(s.w), ct = cardioTarget(s.w);
-    const w = (s.weightWatch ? ' <span class="src">w/s</span>' : '');
-    const kcalCls = s.kcal == null ? '' : Math.abs(s.kcal - s.calT) <= 100 ? 'ok' : 'warnc';
-    const bedT = LIGHTS[Math.min(s.w, 12) - 1];
-    const bedCls = s.bed == null ? '' : s.bed <= mins(bedT) + 15 ? 'ok' : 'warnc';
-    const inWeek = today >= s.ws && today <= s.we;
-    if (s.w === 0) {
-      return '<div class="tk-card"><h3>Baseline week · ' + escapeHtml(prettyDate(s.ws).slice(4)) + '–' + escapeHtml(prettyDate(s.we).slice(4)) + ' (before Ripped 90)</h3><div class="kv">' +
-        row('Weight avg', s.weight != null ? fmt(s.weight, 1) + ' kg' + w : nd(), s.weightN + ' days') +
-        row('Calories', s.kcal != null ? fmt(s.kcal) : nd(), s.kcalN + ' days') +
-        row('Protein', s.protein != null ? fmt(s.protein) + ' g' : nd(), s.proteinN + ' days') +
-        row('Steps', s.steps != null ? fmt(s.steps) + (s.stepsWatch ? ' <span class="src">w/s</span>' : '') : nd(), s.stepsN + ' days') +
-        row('Sleep', s.sleep != null ? fmt(s.sleep, 1) + ' h' + (s.sleepWatch ? ' <span class="src">w/s</span>' : '') : nd(), s.sleepN + ' days') +
-        row('Bedtime avg', s.bed != null ? hhmm(s.bed) + (s.bedWatch ? ' <span class="src">w/s</span>' : '') : nd(), 'goal 23:00') +
-        '</div></div>';
+
+  /* readiness from the latest night: manual sleep first, then watch; RHR/HRV vs prior 28-day baseline */
+  function readiness() {
+    const today = todayIST();
+    for (const d of [today, dAdd(today, -1)]) {
+      const x = day(d); const h = healthRow(d) || {};
+      const sleep = x.sleep.v; const rhr = h.resting_hr != null ? Number(h.resting_hr) : null; const hrv = h.hrv_ms != null ? Number(h.hrv_ms) : null;
+      if (sleep == null && rhr == null && hrv == null) continue;
+      const prior = ((tHealth && tHealth.rows) || []).filter((r) => r.date < d && dDiff(d, r.date) <= 28);
+      const bR = avg(prior.map((r) => r.resting_hr != null ? Number(r.resting_hr) : null));
+      const bH = avg(prior.map((r) => r.hrv_ms != null ? Number(r.hrv_ms) : null));
+      let tier = 'GREEN'; const why = [];
+      const bump = (t) => { if (t === 'RED' || (t === 'AMBER' && tier === 'GREEN')) tier = t; };
+      if (sleep != null) { if (sleep < 5) { bump('RED'); why.push('sleep ' + fmt(sleep, 1) + ' h'); } else if (sleep < 6.5) { bump('AMBER'); why.push('sleep ' + fmt(sleep, 1) + ' h'); } }
+      if (rhr != null && bR != null) { if (rhr >= bR + 10) { bump('RED'); why.push('RHR +' + fmt(rhr - bR) ); } else if (rhr >= bR + 5) { bump('AMBER'); why.push('RHR +' + fmt(rhr - bR)); } }
+      if (hrv != null && bH != null) { const p = (bH - hrv) / bH; if (p >= 0.3) { bump('RED'); why.push('HRV −' + fmt(p * 100) + '%'); } else if (p >= 0.15) { bump('AMBER'); why.push('HRV −' + fmt(p * 100) + '%'); } }
+      return { tier, date: d, why, src: x.sleep.src === 'log' ? 'log' : 'watch' };
     }
-    return '<div class="tk-card"><h3>Week ' + s.w + ' · ' + escapeHtml(prettyDate(s.ws).slice(4)) + '–' + escapeHtml(prettyDate(s.we).slice(4)) + (inWeek ? ' · this week' : '') + '</h3><div class="kv">' +
-      row('Weight avg', s.weight != null ? fmt(s.weight, 1) + ' kg' + w : nd(), s.weightN + ' days') +
-      row('Calories', s.kcal != null ? fmt(s.kcal) : nd(), s.calT ? 'target ' + fmt(s.calT) : 'target 2,200', kcalCls) +
-      row('Protein', s.protein != null ? fmt(s.protein) + ' g' : nd(), 'target 175 g', s.protein == null ? '' : s.protein >= 165 ? 'ok' : 'warnc') +
-      row('Steps', s.steps != null ? fmt(s.steps) + (s.stepsWatch ? ' <span class="src">w/s</span>' : '') : nd(), fmt(st[0]) + '–' + fmt(st[1]), s.steps == null ? '' : s.steps >= st[0] ? 'ok' : 'warnc') +
-      row('Sleep', s.sleep != null ? fmt(s.sleep, 1) + ' h' + (s.sleepWatch ? ' <span class="src">w/s</span>' : '') : nd(), '7.5–8 h', s.sleep == null ? '' : s.sleep >= 7.5 ? 'ok' : 'warnc') +
-      row('Bedtime avg', s.bed != null ? hhmm(s.bed) + (s.bedWatch ? ' <span class="src">w/s</span>' : '') : nd(), 'by ' + bedT + ' → 23:00', bedCls) +
-      row('Sessions', s.sess + ' / 4', 'Ripped 90', s.sess >= 4 ? 'ok' : (inWeek ? '' : 'warnc')) +
-      row('Cardio', s.cardio + ' / ' + (ct[0] === ct[1] ? ct[0] : ct[0] + '–' + ct[1]), 'logged in check-in', s.cardio >= ct[0] ? 'ok' : (inWeek ? '' : 'warnc')) +
-      '</div></div>';
+    return null;
   }
+  function renderHeader() {
+    const today = todayIST(); const w = progWeek(today);
+    $('h-date').textContent = prettyDate(today).toUpperCase();
+    $('h-week').innerHTML = w === 0 ? '00<span class="of">/12</span>' : w > 12 ? 'DONE' : String(w).padStart(2, '0') + '<span class="of">/12</span>';
+    const r = readiness(); const el = $('h-ready');
+    if (!r) { el.className = 'val nd'; el.textContent = 'NO DATA'; return; }
+    el.className = 'val ' + (r.tier === 'GREEN' ? 'you' : r.tier === 'AMBER' ? 'amber' : 'red');
+    el.innerHTML = r.tier + '<span class="of2">' + (r.date === today ? 'TODAY' : escapeHtml(prettyDate(r.date).slice(4).toUpperCase())) + (r.src === 'watch' ? ' · W/S' : '') + ' · EST.</span>';
+    el.title = r.why.join(', ') || 'Within your thresholds';
+  }
+
+  /* ---------- building blocks ---------- */
+  function sec(title, sub) { return '<div class="lab-sec"><span>' + title + '</span>' + (sub ? '<em>' + sub + '</em>' : '') + '</div>'; }
+  function NODATA(txt) { return '<span class="nodata">' + (txt || 'NO DATA YET') + '</span>'; }
+  function ro(label, val, unit, cls, sub) {
+    return '<div class="ro"><div class="ro-l ' + cls + '">' + label + '</div><div class="ro-v ' + cls + '">' + (val == null ? NODATA() : val + (unit ? '<small>' + unit + '</small>' : '')) + '</div>' + (sub ? '<div class="ro-s">' + sub + '</div>' : '') + '</div>';
+  }
+  function stripes(id, color) {
+    return '<pattern id="' + id + '" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="' + color + '" fill-opacity="0.25"/><rect width="3" height="6" fill="' + color + '"/></pattern>';
+  }
+  function barMeter(you, av, target) {
+    const id = 'p' + (++svgN); const W = 340, x0 = 2, x1 = W - 2;
+    const X = (v) => x0 + (x1 - x0) * (1 - Math.min(Math.max(v / target, 0), 2) / 2);
+    let s = '<svg class="chart" viewBox="0 0 ' + W + ' 64"><defs>' + stripes(id + 'a', C.lime) + stripes(id + 'b', C.grey) + '</defs>';
+    s += '<rect x="' + x0 + '" y="6" width="' + (x1 - x0) + '" height="14" fill="#101010"/><rect x="' + x0 + '" y="26" width="' + (x1 - x0) + '" height="14" fill="#101010"/>';
+    if (you != null) s += '<rect x="' + X(you) + '" y="6" width="' + (x1 - X(you)) + '" height="14" fill="url(#' + id + 'a)"/>';
+    if (av != null) s += '<rect x="' + X(av) + '" y="26" width="' + (x1 - X(av)) + '" height="14" fill="url(#' + id + 'b)"/>';
+    s += '<line x1="' + X(target) + '" x2="' + X(target) + '" y1="2" y2="44" stroke="' + C.gold + '" stroke-width="2"/>';
+    [[2, '200%'], [1, '100%'], [0, '0%']].forEach((t) => { s += '<text x="' + X(t[0] * target) + '" y="58" fill="#6a6a6a" font-size="10" text-anchor="' + (t[0] === 2 ? 'start' : t[0] === 0 ? 'end' : 'middle') + '" class="cond">' + t[1] + '</text>'; });
+    return s + '</svg>';
+  }
+  function gauge(rate) {
+    const cx = 110, cy = 104, R = 86, a0 = -210, a1 = 30, max = 1.2;
+    const ang = (v) => (a0 + (a1 - a0) * Math.min(Math.max(v, 0), max) / max) * Math.PI / 180;
+    let s = '<svg class="chart gauge" viewBox="0 0 220 168">';
+    for (let i = 0; i <= 48; i++) {
+      const v = i * max / 48; const a = ang(v); const major = i % 8 === 0;
+      const inBand = v >= 0.4 - 1e-9 && v <= 0.7 + 1e-9;
+      const lit = rate != null && rate > 0 && v <= rate + 1e-9;
+      const col = lit ? C.lime : inBand ? C.gold : '#444';
+      const r1 = R - (major ? 14 : 9);
+      s += '<line x1="' + (cx + Math.cos(a) * R).toFixed(1) + '" y1="' + (cy + Math.sin(a) * R).toFixed(1) + '" x2="' + (cx + Math.cos(a) * r1).toFixed(1) + '" y2="' + (cy + Math.sin(a) * r1).toFixed(1) + '" stroke="' + col + '" stroke-width="' + (major ? 2.4 : 1.6) + '"/>';
+      if (major) s += '<text x="' + (cx + Math.cos(a) * (R - 26)).toFixed(1) + '" y="' + (cy + Math.sin(a) * (R - 26) + 3).toFixed(1) + '" fill="#6a6a6a" font-size="9" text-anchor="middle" class="cond">' + v.toFixed(1) + '</text>';
+    }
+    if (rate != null) {
+      const a = ang(rate); const tip = [cx + Math.cos(a) * (R - 18), cy + Math.sin(a) * (R - 18)];
+      const n = a + Math.PI / 2; const w = 6;
+      s += '<path d="M' + (cx + Math.cos(n) * w).toFixed(1) + ',' + (cy + Math.sin(n) * w).toFixed(1) + ' L' + tip[0].toFixed(1) + ',' + tip[1].toFixed(1) + ' L' + (cx - Math.cos(n) * w).toFixed(1) + ',' + (cy - Math.sin(n) * w).toFixed(1) + ' A' + w + ',' + w + ' 0 1,1 ' + (cx + Math.cos(n) * w).toFixed(1) + ',' + (cy + Math.sin(n) * w).toFixed(1) + 'Z" fill="' + C.lime + '"/>';
+      s += '<circle cx="' + cx + '" cy="' + cy + '" r="2.5" fill="#000"/>';
+    }
+    s += '<text x="' + cx + '" y="' + (cy + 40) + '" fill="' + (rate == null ? '#5e5e5e' : C.lime) + '" font-size="' + (rate == null ? 14 : 30) + '" font-weight="700" text-anchor="middle" class="cond">' + (rate == null ? 'NO DATA YET' : (rate < 0 ? '+' + fmt(-rate, 2) : fmt(rate, 2))) + '</text>';
+    s += '<text x="' + cx + '" y="' + (cy + 56) + '" fill="#8c8c8c" font-size="10" text-anchor="middle" class="cond">' + (rate != null && rate < 0 ? 'KG/WK GAINED' : 'KG/WK LOST') + '</text>';
+    return s + '</svg>';
+  }
+  function spark(vals, W, H, color) {
+    const v = vals.filter((x) => x != null);
+    if (v.length < 2) return '';
+    const mn = Math.min.apply(null, v), mx = Math.max.apply(null, v), rg = mx - mn || 1;
+    const pts = vals.map((x, i) => [4 + (W - 8) * i / (vals.length - 1), H - 4 - (H - 8) * (x - mn) / rg]);
+    const bi = vals.indexOf(mx);
+    return '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '"><polyline points="' + pts.map((p) => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ') + '" fill="none" stroke="' + color + '" stroke-width="2"/><circle cx="' + pts[bi][0].toFixed(1) + '" cy="' + pts[bi][1].toFixed(1) + '" r="3" fill="' + C.gold + '"/></svg>';
+  }
+  function weightChart(today) {
+    const from = dAdd(R90.start, -21), to = R90.end;
+    const pts = weightSeries(from, today < to ? today : to);
+    if (!pts.length) return '<div class="tk-card">' + NODATA() + '</div>';
+    const W = 340, H = 180, L = 26, Rr = 6, T = 8, B = 20;
+    const span = dDiff(to, from);
+    const vals = pts.map((p) => p.v).concat([R90.baseW, R90.targetLo - 1.5]);
+    const yMin = Math.floor(Math.min.apply(null, vals) - 0.5), yMax = Math.ceil(Math.max.apply(null, vals) + 0.5);
+    const X = (d) => L + (W - L - Rr) * dDiff(d, from) / span;
+    const Y = (v) => T + (H - T - B) * (yMax - v) / (yMax - yMin);
+    let svg = '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Weight trend">';
+    for (let v = yMin; v <= yMax; v += (yMax - yMin > 8 ? 2 : 1)) svg += '<line x1="' + L + '" x2="' + (W - Rr) + '" y1="' + Y(v) + '" y2="' + Y(v) + '" stroke="#1f1f1f" stroke-dasharray="1 3"/><text x="' + (L - 4) + '" y="' + (Y(v) + 3) + '" fill="#6a6a6a" font-size="9" text-anchor="end" class="cond">' + v + '</text>';
+    const endW = dDiff(R90.end, R90.start) / 7;
+    svg += '<polygon points="' + X(R90.start) + ',' + Y(R90.baseW) + ' ' + X(R90.end) + ',' + Y(R90.baseW - 0.4 * endW) + ' ' + X(R90.end) + ',' + Y(R90.baseW - 0.7 * endW) + '" fill="' + C.gold + '" fill-opacity="0.10" stroke="' + C.gold + '" stroke-opacity="0.5" stroke-dasharray="3 3"/>';
+    svg += '<rect x="' + X(dAdd(R90.end, -6)) + '" width="' + (X(R90.end) - X(dAdd(R90.end, -6))) + '" y="' + Y(R90.targetHi) + '" height="' + (Y(R90.targetLo) - Y(R90.targetHi)) + '" fill="' + C.gold + '" fill-opacity="0.6"/>';
+    if (today >= from && today <= to) svg += '<line x1="' + X(today) + '" x2="' + X(today) + '" y1="' + T + '" y2="' + (H - B) + '" stroke="' + C.lime + '" stroke-opacity="0.4"/>';
+    const segs = []; let seg = [];
+    for (let d = pts[0].d; d <= pts[pts.length - 1].d; d = dAdd(d, 1)) { const a = trailingAvg(pts, d); if (a != null) seg.push(X(d).toFixed(1) + ',' + Y(a).toFixed(1)); else if (seg.length) { segs.push(seg); seg = []; } }
+    if (seg.length) segs.push(seg);
+    if (segs.length) svg += '<path d="' + segs.map((g) => 'M' + g.join(' L')).join(' ') + '" fill="none" stroke="' + C.grey + '" stroke-width="2"/>';
+    for (const p of pts) svg += '<circle cx="' + X(p.d).toFixed(1) + '" cy="' + Y(p.v).toFixed(1) + '" r="2.4" fill="' + (p.src === 'log' ? C.lime : 'none') + '" stroke="' + (p.src === 'log' ? C.lime : '#8c8c8c') + '" stroke-width="1"/>';
+    [[from, prettyDate(from).slice(4).toUpperCase()], [R90.start, '24 NOV'], ['2026-12-21', 'WK 4'], ['2027-01-18', 'WK 8'], [R90.end, '15 FEB']].forEach((t) => {
+      svg += '<text x="' + X(t[0]) + '" y="' + (H - 5) + '" fill="#6a6a6a" font-size="9" text-anchor="' + (t[0] === R90.end ? 'end' : t[0] === from ? 'start' : 'middle') + '" class="cond">' + t[1] + '</text>';
+    });
+    svg += '</svg>';
+    return '<div class="tk-card">' + svg + '<div class="legend"><span><i style="background:' + C.lime + '"></i>YOU · LOG</span><span><i style="border:1px solid #8c8c8c"></i>W/S</span><span><i style="background:' + C.grey + '"></i>7-DAY AVG</span><span><i style="background:' + C.gold + ';opacity:.5"></i>0.4–0.7 KG/WK BAND · 86–88 TARGET</span></div></div>';
+  }
+  function sleepTimeline(today) {
+    const nights = []; for (let i = 13; i >= 0; i--) nights.push(dAdd(today, -i));
+    const A = 21 * 60, Z = 35 * 60; const W = 340, L = 46, Rr = 34, rowH = 15;
+    const X = (m) => L + (W - L - Rr) * (m - A) / (Z - A);
+    let s = '<svg class="chart" viewBox="0 0 ' + W + ' ' + (nights.length * rowH + 22) + '">';
+    [[21, '21'], [23, '23'], [25, '01'], [27, '03'], [29, '05'], [31, '07'], [33, '09'], [35, '11']].forEach((t) => {
+      s += '<line x1="' + X(t[0] * 60) + '" x2="' + X(t[0] * 60) + '" y1="0" y2="' + nights.length * rowH + '" stroke="' + (t[0] === 23 ? C.gold : '#1f1f1f') + '" stroke-dasharray="' + (t[0] === 23 ? '3 2' : '1 3') + '"/>';
+      s += '<text x="' + X(t[0] * 60) + '" y="' + (nights.length * rowH + 14) + '" fill="' + (t[0] === 23 ? C.gold : '#6a6a6a') + '" font-size="9" text-anchor="middle" class="cond">' + t[1] + ':00</text>';
+    });
+    let any = false;
+    nights.forEach((d, i) => {
+      const x = day(d); const y = i * rowH + 3;
+      const wk = Math.min(Math.max(progWeek(d), 1), 12); const tgt = mins(LIGHTS[wk - 1]);
+      s += '<text x="0" y="' + (y + 9) + '" fill="#8c8c8c" font-size="9.5" class="cond">' + escapeHtml(prettyDate(d).toUpperCase().slice(0, 6)) + '</text>';
+      const b = mins(x.bedtime.v); let e = mins(x.wake.v);
+      if (b == null) { s += '<text x="' + X(A + 30) + '" y="' + (y + 9) + '" fill="#4a4a4a" font-size="9" class="cond">NO DATA</text>'; return; }
+      any = true;
+      if (e == null || e <= b) e = x.sleep.v != null ? b + x.sleep.v * 60 : b + 30;
+      const col = b <= tgt ? C.lime : b > tgt + 30 ? C.warn : C.grey;
+      s += '<rect x="' + X(Math.max(b, A)).toFixed(1) + '" y="' + y + '" width="' + Math.max(2, X(Math.min(e, Z)) - X(Math.max(b, A))).toFixed(1) + '" height="10" rx="5" fill="' + col + '"' + (x.bedtime.src === 'watch' ? ' fill-opacity="0.55"' : '') + '/>';
+      s += '<text x="' + (W - 2) + '" y="' + (y + 9) + '" fill="#d0d0d0" font-size="9.5" text-anchor="end" class="cond">' + (x.sleep.v != null ? fmt(x.sleep.v, 1) + 'H' : '') + '</text>';
+    });
+    s += '</svg>';
+    return { svg: s, any };
+  }
+  function heatmap(today) {
+    const lvl = ['#151515', '#3b4a00', '#7f9e00', '#c8ff1a'];
+    const cell = 22, gap = 4, L = 18, T = 16;
+    let s = '<svg class="chart" viewBox="0 0 ' + (L + 12 * (cell + gap)) + ' ' + (T + 7 * (cell + gap) + 2) + '">';
+    'TWTFSSM'.split('').forEach((c, r) => { s += '<text x="0" y="' + (T + r * (cell + gap) + 15) + '" fill="#6a6a6a" font-size="10" class="cond">' + c + '</text>'; });
+    let total = 0, best = 0, run = 0, cur = 0;
+    for (let w = 0; w < 12; w++) {
+      if (w === 0 || w === 3 || w === 7 || w === 11) s += '<text x="' + (L + w * (cell + gap) + cell / 2) + '" y="10" fill="#6a6a6a" font-size="9" text-anchor="middle" class="cond">W' + (w + 1) + '</text>';
+      for (let r = 0; r < 7; r++) {
+        const d = dAdd(R90.start, w * 7 + r);
+        const x = L + w * (cell + gap), y = T + r * (cell + gap);
+        if (d > today) { s += '<rect x="' + x + '" y="' + y + '" width="' + cell + '" height="' + cell + '" rx="4" fill="none" stroke="#222"/>'; continue; }
+        const ci = !!dailyFor(d); const se = workoutsOn(d).length > 0;
+        const l = (ci ? 1 : 0) + (se ? 2 : 0);
+        if (l) { total++; run++; best = Math.max(best, run); } else run = 0;
+        s += '<rect x="' + x + '" y="' + y + '" width="' + cell + '" height="' + cell + '" rx="4" fill="' + lvl[l] + '"' + (d === today ? ' stroke="' + C.gold + '" stroke-width="2"' : '') + '/>';
+      }
+    }
+    cur = run;
+    return { svg: s + '</svg>', total, best, cur };
+  }
+  function radar(cur, prev) {
+    const axes = ['TRAIN', 'PROTEIN', 'STEPS', 'SLEEP', 'KCAL', 'CARDIO'];
+    const score = (s) => {
+      if (!s) return null;
+      const st = stepTarget(Math.max(s.w, 1)), ct = cardioTarget(Math.max(s.w, 1));
+      return [s.sess / 4, s.protein != null ? s.protein / 175 : 0, s.steps != null ? s.steps / st[0] : 0, s.sleep != null ? s.sleep / 7.5 : 0,
+        s.kcal != null ? 1 - Math.min(1, Math.abs(s.kcal - s.calT) / 400) : 0, s.cardio / ct[0]].map((v) => Math.min(Math.max(v, 0), 1));
+    };
+    const cx = 120, cy = 108, R = 78;
+    const pt = (i, v) => { const a = -Math.PI / 2 + i * 2 * Math.PI / 6; return [cx + Math.cos(a) * R * v, cy + Math.sin(a) * R * v]; };
+    let s = '<svg class="chart" viewBox="0 0 240 216">';
+    [0.25, 0.5, 0.75, 1].forEach((k) => { s += '<polygon points="' + axes.map((_, i) => pt(i, k).map((n) => n.toFixed(1)).join(',')).join(' ') + '" fill="none" stroke="' + (k === 1 ? C.gold : '#262626') + '" stroke-dasharray="' + (k === 1 ? '3 2' : '0') + '"/>'; });
+    axes.forEach((a, i) => { const p = pt(i, 1); const q = pt(i, 1.2); s += '<line x1="' + cx + '" y1="' + cy + '" x2="' + p[0].toFixed(1) + '" y2="' + p[1].toFixed(1) + '" stroke="#262626"/><text x="' + q[0].toFixed(1) + '" y="' + (q[1] + 4).toFixed(1) + '" fill="#9a9a9a" font-size="10" text-anchor="middle" class="cond">' + a + '</text>'; });
+    const poly = (sc, col, op) => sc ? '<polygon points="' + sc.map((v, i) => pt(i, v).map((n) => n.toFixed(1)).join(',')).join(' ') + '" fill="' + col + '" fill-opacity="' + op + '" stroke="' + col + '" stroke-width="1.6"/>' : '';
+    const a = score(cur), b = score(prev);
+    s += poly(b, C.grey, 0.18) + poly(a, C.lime, 0.28);
+    return s + '</svg>';
+  }
+  function dotMatrix(today) {
+    const done = {}; realSessions().forEach((x) => { if (R90_TYPES.includes(x.session_type) && x.session_date >= R90.start && x.session_date <= R90.end && (x.exercises || []).some((e) => (e.sets || []).length)) { const w = progWeek(x.session_date); done[w] = (done[w] || 0) + 1; } });
+    const wNow = progWeek(today);
+    const r = 7, g = 6; let total = 0;
+    let s = '<svg class="chart" viewBox="0 0 ' + (12 * (2 * r + g) + 4) + ' ' + (4 * (2 * r + g) + 4) + '">';
+    for (let w = 1; w <= 12; w++) for (let k = 0; k < 4; k++) {
+      const cx = 2 + r + (w - 1) * (2 * r + g), cy = 2 + r + k * (2 * r + g);
+      const isDone = k < Math.min(done[w] || 0, 4); if (isDone) total++;
+      const missed = !isDone && w < wNow;
+      s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + (isDone ? C.lime : missed ? '#3a3a3a' : 'none') + '" stroke="' + (isDone ? C.lime : w === wNow ? C.gold : '#2e2e2e') + '" stroke-width="1.4"/>';
+    }
+    Object.keys(done).forEach((w) => { if (done[w] > 4) total += 0; });
+    return { svg: s + '</svg>', total, week: wNow >= 1 && wNow <= 12 ? (done[wNow] || 0) : null };
+  }
+  function warnings(today, rdy) {
+    const out = [];
+    if (rdy && rdy.tier !== 'GREEN') out.push({ red: rdy.tier === 'RED', t: 'READINESS ' + rdy.tier, d: (rdy.why.join(', ') || '') + (rdy.tier === 'RED' ? ' · no lifting, walk, move the session to tomorrow' : ' · 2 sets per exercise, 3 RIR, no neck work') });
+    const from = dAdd(today, -7) < R90.start ? R90.start : dAdd(today, -7);
+    let missed = 0; for (let d = from; d < today; d = dAdd(d, 1)) if (!dailyFor(d)) missed++;
+    if (missed) out.push({ t: missed + ' MISSED CHECK-IN' + (missed > 1 ? 'S' : ''), d: 'Last 7 days, since ' + prettyDate(from) + '. Log them in the Daily tab.' });
+    const beds = []; for (let i = 0; i < 7; i++) { const b = mins(day(dAdd(today, -i)).bedtime.v); if (b != null) beds.push(b); }
+    const wk = Math.min(Math.max(progWeek(today), 1), 12); const tgt = mins(LIGHTS[wk - 1]);
+    if (beds.length >= 3 && avg(beds) > tgt + 30) out.push({ t: 'LATE BEDTIME TREND', d: '7-night average ' + hhmm(avg(beds)) + ' vs this week’s ' + LIGHTS[wk - 1] + ' target (goal 23:00).' });
+    return out;
+  }
+  function meterCard(label, you, youSub, av, avSub, target, targetTxt, unit, dp) {
+    return '<div class="tk-card meter"><div class="m-lbl">' + label + '</div><div class="ro3">' +
+      ro('YOU', you != null ? fmt(you, dp) : null, unit, 'you', youSub) + ro('AVG 7D', av != null ? fmt(av, dp) : null, unit, 'avg', avSub) + ro('TARGET', targetTxt, unit, 'gold', '') +
+      '</div>' + barMeter(you, av, target) + '</div>';
+  }
+  function latest(fn, today, days) {
+    for (let i = 0; i < (days || 3); i++) { const d = dAdd(today, -i); const v = fn(day(d)); if (v && v.v != null) return Object.assign({ d }, v); }
+    return null;
+  }
+  function last7(fn, today) { const v = []; let w = false; for (let i = 0; i < 7; i++) { const r = fn(day(dAdd(today, -i))); if (r && r.v != null) { v.push(r.v); if (r.src === 'watch') w = true; } } return { v: avg(v), n: v.length, w }; }
+  function subOf(x) { return x ? escapeHtml(prettyDate(x.d).slice(4).toUpperCase()) + (x.src === 'watch' ? ' · W/S' : '') : ''; }
+
   function renderProgress() {
     const root = $('tab-progress');
     const today = todayIST();
     const wNow = progWeek(today);
     const nextReview = REVIEWS.find((d) => d >= today);
+    const nextAssess = ASSESS.find((a) => a[1] >= today);
+    const rdy = readiness();
+    svgN = 0;
     let html = '';
-    // programme header
-    html += '<div class="tk-card"><h3>Project Ripped 90 · 24 Nov 2026 → 15 Feb 2027</h3><div class="big">' +
-      (wNow === 0 ? 'Starts Tue 24 Nov' : wNow > 12 ? 'Programme complete' : 'Week ' + wNow + ' of 12') + '</div>' +
-      '<div class="sub">' + (wNow >= 1 && wNow <= 12 ? 'Day ' + (dDiff(today, R90.start) + 1) + ' of 84 · ' : '') + 'Next calorie review: ' + (nextReview ? '<b>' + escapeHtml(prettyDate(nextReview)) + '</b> (' + dDiff(nextReview, today) + ' days)' : 'none left') + '</div>' +
-      '<div style="margin-top:8px">' + REVIEWS.map((d) => '<span class="pill ' + (d === nextReview ? 'next' : d < today ? 'done' : '') + '">Review ' + escapeHtml(prettyDate(d).slice(4)) + '</span>').join('') + '</div>' +
-      '<div>' + ASSESS.map((a) => '<span class="pill ' + (a[1] === ASSESS.map((x) => x[1]).find((d) => d >= today) ? 'next' : a[1] < today ? 'done' : '') + '">' + a[0] + ' assessment · ' + escapeHtml(prettyDate(a[1]).slice(4)) + '</span>').join('') + '</div></div>';
+    // hazard
+    const warn = warnings(today, rdy);
+    if (warn.length) {
+      const red = warn.some((w) => w.red);
+      html += '<div class="hazard' + (red ? ' red' : '') + '"><div class="hz-top"></div><div class="hz-body"><div class="hz-row"><div><div class="m-lbl warnl">ATTENTION</div><div class="hz-big">' + warn.length + '</div></div><span class="hz-btn">' + warn.length + ' ITEM' + (warn.length > 1 ? 'S' : '') + '</span></div>' +
+        warn.map((w) => '<div class="hz-item"><b>' + escapeHtml(w.t) + '</b><span>' + escapeHtml(w.d) + '</span></div>').join('') + '</div></div>';
+    }
+    // test details
+    const day84 = wNow >= 1 && wNow <= 12 ? dDiff(today, R90.start) + 1 : wNow > 12 ? 84 : 0;
+    const dm = dotMatrix(today);
+    html += sec('TEST DETAILS', 'PROJECT RIPPED 90');
+    html += '<div class="tk-card"><div class="ro3">' +
+      ro('WEEK', wNow === 0 ? '00' : String(Math.min(wNow, 12)).padStart(2, '0'), '/12', 'you', wNow === 0 ? 'STARTS TUE 24 NOV' : '') +
+      ro('DAY', String(day84).padStart(2, '0'), '/84', 'avg', '') +
+      ro('NEXT REVIEW', nextReview ? escapeHtml(prettyDate(nextReview).slice(4).toUpperCase()) : '—', '', 'gold', nextReview ? 'IN ' + dDiff(nextReview, today) + ' DAYS' : '') +
+      '</div><div class="pills">' + REVIEWS.map((d) => '<span class="pill ' + (d === nextReview ? 'next' : d < today ? 'done' : '') + '">REVIEW ' + escapeHtml(prettyDate(d).slice(4).toUpperCase()) + '</span>').join('') +
+      ASSESS.map((a) => '<span class="pill gold ' + (nextAssess && a[1] === nextAssess[1] ? 'next' : a[1] < today ? 'done' : '') + '">' + a[0].toUpperCase() + ' · ' + escapeHtml(prettyDate(a[1]).slice(4).toUpperCase()) + '</span>').join('') + '</div></div>';
+    html += '<div class="tk-card"><div class="m-lbl">SESSIONS · 4 PER WEEK × 12</div><div class="ro3">' + ro('DONE', String(dm.total), '/48', 'you', '') + ro('THIS WEEK', dm.week == null ? null : String(dm.week), '/4', 'avg', '') + ro('TARGET', '4', '/WK', 'gold', '') + '</div>' + dm.svg +
+      '<div class="legend"><span><i style="background:' + C.lime + '"></i>DONE</span><span><i style="background:#3a3a3a"></i>MISSED</span><span><i style="border:1px solid ' + C.gold + '"></i>THIS WEEK</span></div></div>';
+    // body weight
+    const pts = weightSeries(dAdd(R90.start, -35), today);
+    const last = pts.length ? pts[pts.length - 1] : null;
+    const a7 = last ? trailingAvg(pts, last.d) : null;
+    const aPrev = last ? trailingAvg(pts, dAdd(last.d, -7)) : null;
+    const rate = a7 != null && aPrev != null ? aPrev - a7 : null;
+    html += sec('TEST RESULTS', 'BODY WEIGHT');
+    html += '<div class="tk-card"><div class="ro3">' +
+      ro('YOU', last ? fmt(last.v, 1) : null, 'KG', 'you', last ? subOf({ d: last.d, src: last.src }) : '') +
+      ro('AVG 7D', a7 != null ? fmt(a7, 1) : null, 'KG', 'avg', a7 != null ? 'TREND' : '') +
+      ro('TARGET', '86–88', 'KG', 'gold', 'WEEK 12') + '</div>' + gauge(rate) +
+      '<div class="sub center">RATE OF LOSS · GOLD BAND = 0.4–0.7 KG/WK' + (rate != null && pts.some((p) => p.src === 'watch') ? ' · INCLUDES W/S' : '') + '</div></div>';
     html += weightChart(today);
-    // weekly cards (current first)
-    const lastW = Math.min(Math.max(wNow, 1), 12);
-    for (let w = lastW; w >= 1; w--) html += weekCard(weekStats(w), today);
-    if (wNow <= 2) html += weekCard(weekStats(0), today);
+    // meters
+    html += sec('TEST RESULTS', 'DAILY INPUTS · YOU / AVERAGE / TARGET');
+    const wk = Math.min(Math.max(wNow, 1), 12); const st = stepTarget(wk);
+    const pY = latest((x) => ({ v: x.protein, src: 'log' }), today); const pA = last7((x) => ({ v: x.protein, src: 'log' }), today);
+    html += meterCard('PROTEIN', pY && pY.v, subOf(pY), pA.v, pA.n ? pA.n + ' DAYS' : '', 175, '175', 'G', 0);
+    const kY = latest((x) => ({ v: x.calories, src: 'log' }), today); const kA = last7((x) => ({ v: x.calories, src: 'log' }), today);
+    const kT = kY && day(kY.d).training ? 2300 : 2070;
+    html += meterCard('CALORIES', kY && kY.v, subOf(kY) + (kY ? (day(kY.d).training ? ' · TRAIN' : ' · REST') : ''), kA.v, kA.n ? kA.n + ' DAYS' : '', kY ? kT : 2200, kY ? fmt(kT) : '2,200', 'KCAL', 0);
+    const sY = latest((x) => x.steps, today); const sA = last7((x) => x.steps, today);
+    html += meterCard('STEPS', sY && sY.v, subOf(sY), sA.v, sA.n ? sA.n + ' DAYS' + (sA.w ? ' · W/S' : '') : '', st[0], fmt(st[0] / 1000, 0) + '–' + fmt(st[1] / 1000, 0) + 'K', '', 0);
+    const zY = latest((x) => x.sleep, today); const zA = last7((x) => x.sleep, today);
+    html += meterCard('SLEEP', zY && zY.v, subOf(zY), zA.v, zA.n ? zA.n + ' NIGHTS' + (zA.w ? ' · W/S' : '') : '', 7.5, '7.5–8', 'H', 1);
+    // sleep timeline
+    const tl = sleepTimeline(today);
+    html += sec('SLEEP TIMELINE', 'LAST 14 NIGHTS · GOAL LIGHTS OUT 23:00');
+    html += '<div class="tk-card">' + (tl.any ? tl.svg : NODATA()) + '<div class="legend"><span><i style="background:' + C.lime + '"></i>ON TARGET</span><span><i style="background:' + C.grey + '"></i>UP TO 30 MIN LATE</span><span><i style="background:' + C.warn + '"></i>30+ MIN LATE</span><span><i style="background:' + C.gold + '"></i>23:00</span></div><div class="sub">Target this week: lights out ' + LIGHTS[wk - 1] + '. Faded bars = w/s.</div></div>';
+    // heatmap
+    const hm = heatmap(today);
+    html += sec('CONSISTENCY', wNow === 0 ? '12 WEEKS · STARTS TUE 24 NOV' : '12-WEEK CALENDAR');
+    html += '<div class="tk-card"><div class="ro3">' + ro('TOTAL', hm.total ? String(hm.total) : null, 'DAYS', 'you', '') + ro('CURRENT', hm.total ? String(hm.cur) : null, 'STREAK', 'avg', '') + ro('BEST', hm.total ? String(hm.best) : null, 'STREAK', 'gold', '') + '</div>' + hm.svg +
+      '<div class="legend"><span><i style="background:#3b4a00"></i>CHECK-IN</span><span><i style="background:#7f9e00"></i>SESSION</span><span><i style="background:' + C.lime + '"></i>BOTH</span><span><i style="border:1px solid ' + C.gold + '"></i>TODAY</span></div></div>';
+    // radar
+    const curS = weekStats(wNow >= 1 ? Math.min(wNow, 12) : 0);
+    const prevS = wNow >= 2 ? weekStats(Math.min(wNow, 12) - 1) : (wNow === 1 ? weekStats(0) : null);
+    html += sec('ADHERENCE', wNow >= 1 ? 'WEEK ' + Math.min(wNow, 12) + ' VS ' + (wNow >= 2 ? 'WEEK ' + (Math.min(wNow, 12) - 1) : 'BASELINE') : 'BASELINE WEEK');
+    html += '<div class="tk-card">' + radar(curS, prevS) + '<div class="legend"><span><i style="background:' + C.lime + '"></i>' + (wNow >= 1 ? 'THIS WEEK' : 'BASELINE 17–23 NOV') + '</span>' + (prevS ? '<span><i style="background:' + C.grey + '"></i>' + (wNow >= 2 ? 'LAST WEEK' : 'BASELINE') + '</span>' : '') + '<span><i style="border:1px dashed ' + C.gold + '"></i>100% OF TARGET</span></div>' +
+      '<div class="sub">Each axis is the share of target hit: sessions/4, protein/175 g, steps/week target, sleep/7.5 h, calories within 400 kcal, cardio/week target. Missing data counts as 0.</div></div>';
+    // week log
+    html += sec('WEEK LOG', 'YOU VS TARGET');
+    const lastW = wNow >= 1 ? Math.min(wNow, 12) : 0;
+    let wl = '<div class="tk-card"><table class="tbl lab"><tr><th>WK</th><th class="r">WT</th><th class="r">KCAL</th><th class="r">PROT</th><th class="r">STEPS</th><th class="r">SLEEP</th><th class="r">SES</th><th class="r">CAR</th></tr>';
+    const cell = (v, ok, txt) => '<td class="r ' + (v == null ? 'nd' : ok ? 'you' : 'amber') + '">' + (v == null ? '—' : txt) + '</td>';
+    for (let w = lastW; w >= (wNow <= 2 ? 0 : 1); w--) {
+      const s = weekStats(w); const t = stepTarget(Math.max(w, 1)); const ct = cardioTarget(Math.max(w, 1));
+      wl += '<tr><td class="cond">' + (w === 0 ? 'BASE' : 'W' + w) + '</td><td class="r">' + (s.weight != null ? fmt(s.weight, 1) + (s.weightWatch ? '<sup>w/s</sup>' : '') : '<span class="nd">—</span>') + '</td>' +
+        cell(s.kcal, s.kcal != null && Math.abs(s.kcal - s.calT) <= 100, fmt(s.kcal)) + cell(s.protein, s.protein >= 165, fmt(s.protein)) +
+        cell(s.steps, s.steps >= t[0], fmt(s.steps / 1000, 1) + 'k') + cell(s.sleep, s.sleep >= 7.5, fmt(s.sleep, 1)) +
+        '<td class="r ' + (w === 0 ? 'nd' : s.sess >= 4 ? 'you' : '') + '">' + (w === 0 ? '—' : s.sess + '/4') + '</td><td class="r ' + (w === 0 ? 'nd' : s.cardio >= ct[0] ? 'you' : '') + '">' + (w === 0 ? '—' : s.cardio + '/' + ct[0]) + '</td></tr>';
+    }
+    html += wl + '</table><div class="sub">Lime = on target, orange = off target, — = no data. Targets: kcal 2,300 train / 2,070 rest, protein 175 g, steps per week plan, sleep 7.5 h.</div></div>';
     // waist
     const waist = visible(tWeekly).filter((r) => r.waist_cm != null).slice().sort((a, b) => a.entry_date < b.entry_date ? -1 : 1);
-    html += '<div class="tk-card"><h3>Waist at navel</h3>';
-    if (!waist.length) html += nd('No measurements yet.') + '<div class="sub">Plan baseline 91.44 cm is self-reported, not measured in the app. Re-measure in week 1.</div>';
+    html += sec('WAIST AT NAVEL', 'WEEKLY');
+    if (!waist.length) html += '<div class="tk-card"><div class="ro3">' + ro('YOU', null, '', 'you', '') + ro('START', '91.4', 'CM', 'avg', 'SELF-REPORTED') + ro('TARGET', '↓', '', 'gold', 'DOWN') + '</div><div class="sub">Re-measure in week 1; that becomes the baseline.</div></div>';
     else {
-      const first = waist[0], last = waist[waist.length - 1];
-      html += '<div class="big">' + fmt(last.waist_cm, 1) + ' cm</div><div class="sub">' + (waist.length > 1 ? (last.waist_cm - first.waist_cm >= 0 ? '+' : '') + fmt(last.waist_cm - first.waist_cm, 1) + ' cm since ' + escapeHtml(prettyDate(first.entry_date)) : 'First measurement, ' + escapeHtml(prettyDate(first.entry_date))) + '</div>';
-      html += '<table class="tbl" style="margin-top:8px"><tr><th>Date</th><th class="r">Waist</th><th class="r">Chest</th><th class="r">Arm</th></tr>' +
-        visible(tWeekly).slice(0, 8).map((r) => '<tr><td>' + escapeHtml(prettyDate(r.entry_date)) + (r.is_test ? ' <span class="badge check">TEST</span>' : '') + '</td><td class="r">' + (r.waist_cm != null ? r.waist_cm : '—') + '</td><td class="r">' + (r.chest_cm != null ? r.chest_cm : '—') + '</td><td class="r">' + (r.arm_cm != null ? r.arm_cm : '—') + '</td></tr>').join('') + '</table>';
+      const f = waist[0], z = waist[waist.length - 1];
+      html += '<div class="tk-card"><div class="ro3">' + ro('YOU', fmt(z.waist_cm, 1), 'CM', 'you', escapeHtml(prettyDate(z.entry_date).slice(4).toUpperCase())) + ro('START', fmt(f.waist_cm, 1), 'CM', 'avg', escapeHtml(prettyDate(f.entry_date).slice(4).toUpperCase())) +
+        ro('CHANGE', waist.length > 1 ? (z.waist_cm - f.waist_cm >= 0 ? '+' : '') + fmt(z.waist_cm - f.waist_cm, 1) : '0.0', 'CM', 'gold', '') + '</div>' + spark(waist.map((r) => Number(r.waist_cm)), 340, 50, C.lime) +
+        '<table class="tbl lab"><tr><th>DATE</th><th class="r">WAIST</th><th class="r">CHEST</th><th class="r">ARM</th><th class="r">PHOTOS</th></tr>' +
+        visible(tWeekly).slice(0, 6).map((r) => '<tr><td>' + escapeHtml(prettyDate(r.entry_date).toUpperCase()) + (r.is_test ? ' <span class="badge check">TEST</span>' : '') + '</td><td class="r">' + (r.waist_cm != null ? r.waist_cm : '—') + '</td><td class="r">' + (r.chest_cm != null ? r.chest_cm : '—') + '</td><td class="r">' + (r.arm_cm != null ? r.arm_cm : '—') + '</td><td class="r">' + ['photo_front', 'photo_side', 'photo_back'].map((k) => r[k] == null ? '·' : r[k] ? '✓' : '✗').join('') + '</td></tr>').join('') + '</table></div>';
     }
-    html += '</div>';
     // strength
-    const lifts = MAIN_LIFTS.map((n) => ({ n, h: liftHistory(n) }));
-    html += '<div class="tk-card"><h3>Strength · top set per session</h3><table class="tbl"><tr><th>Lift</th><th class="r">First</th><th class="r">Latest</th><th class="r">e1RM*</th></tr>' +
-      lifts.map((l) => {
-        if (!l.h.length) return '<tr><td>' + escapeHtml(l.n) + '</td><td class="r" colspan="3">' + nd() + '</td></tr>';
-        const f = l.h[0], z = l.h[l.h.length - 1];
-        const ch = l.h.length > 1 ? ((z.e - f.e) / f.e * 100) : null;
-        return '<tr><td>' + escapeHtml(l.n) + '<div class="src">' + l.h.length + ' session' + (l.h.length > 1 ? 's' : '') + '</div></td><td class="r">' + f.t.w + '×' + f.t.r + '<div class="src">' + escapeHtml(prettyDate(f.date).slice(4)) + '</div></td><td class="r">' + z.t.w + '×' + z.t.r + '<div class="src">' + escapeHtml(prettyDate(z.date).slice(4)) + '</div></td><td class="r">' + fmt(z.e, 1) + (ch != null ? '<div class="src ' + (ch >= -10 ? '' : 'warnc') + '">' + (ch >= 0 ? '+' : '') + fmt(ch, 1) + '%</div>' : '') + '</td></tr>';
-      }).join('') + '</table><div class="sub" style="margin-top:8px">*Estimated 1-rep max (Epley: kg × (1 + reps/30)). An estimate for trend only, not a tested max.</div></div>';
+    html += sec('STRENGTH', 'TOP SET PER SESSION');
+    html += '<div class="lift-grid">' + MAIN_LIFTS.map((n) => {
+      const h = liftHistory(n);
+      if (!h.length) return '<div class="tk-card lift"><div class="m-lbl">' + escapeHtml(n.toUpperCase()) + '</div><div class="lift-v">' + NODATA() + '</div></div>';
+      const z = h[h.length - 1]; const f = h[0];
+      const ch = h.length > 1 ? (z.e - f.e) / f.e * 100 : null;
+      return '<div class="tk-card lift"><div class="m-lbl">' + escapeHtml(n.toUpperCase()) + '</div><div class="lift-v you">' + z.t.w + '<small>KG</small> × ' + z.t.r + '</div>' +
+        '<div class="ro-s">E1RM ' + fmt(z.e, 1) + ' KG · ESTIMATE' + (ch != null ? ' · <span class="' + (ch >= -10 ? 'you' : 'amber') + '">' + (ch >= 0 ? '+' : '') + fmt(ch, 1) + '%</span>' : '') + '</div>' +
+        '<div class="ro-s">' + h.length + ' SESSION' + (h.length > 1 ? 'S' : '') + ' · ' + escapeHtml(prettyDate(z.date).slice(4).toUpperCase()) + (z.test ? ' · TEST' : '') + '</div>' + spark(h.map((x) => x.e), 150, 36, C.lime) + '</div>';
+    }).join('') + '</div><div class="sub">E1RM = estimated 1-rep max (Epley: kg × (1 + reps/30)). A trend estimate, not a tested max. Gold dot = best.</div>';
     // assessment summary
     const w1 = weekStats(1);
     const cur = wNow >= 2 ? weekStats(Math.min(wNow, 12)) : null;
     const cmp = (label, a, b, unit, dp, better) => {
-      if (a == null) return row(label, nd(), 'week 1');
-      if (b == null) return row(label, fmt(a, dp) + unit, 'week 1 only');
-      const d = b - a; const cls = better === 0 ? '' : (better < 0 ? d <= 0 : d >= 0) ? 'ok' : 'warnc';
-      return row(label, fmt(b, dp) + unit, 'wk 1 ' + fmt(a, dp) + ' (' + (d >= 0 ? '+' : '') + fmt(d, dp) + ')', cls);
+      if (a == null) return row(label, '<span class="nd">NO DATA YET</span>', 'WEEK 1');
+      if (b == null) return row(label, fmt(a, dp) + unit, 'WEEK 1 ONLY');
+      const d = b - a; const cls = better === 0 ? '' : (better < 0 ? d <= 0 : d >= 0) ? 'you' : 'amber';
+      return row(label, fmt(b, dp) + unit, 'WK 1 ' + fmt(a, dp) + ' (' + (d >= 0 ? '+' : '') + fmt(d, dp) + ')', cls);
     };
-    const nextAssess = ASSESS.find((a) => a[1] >= today);
     const waist1 = waist.find((r) => r.entry_date >= R90.start && r.entry_date <= dAdd(R90.start, 6)) || null;
     const waistL = waist.length ? waist[waist.length - 1] : null;
-    html += '<div class="tk-card"><h3>Assessment summary' + (nextAssess ? ' · next ' + nextAssess[0] + ', ' + escapeHtml(prettyDate(nextAssess[1]).slice(4)) : '') + '</h3>' +
-      '<div class="sub" style="margin-bottom:8px">Current week compared with the week-1 baseline (24–30 Nov). Fills in as data arrives.</div><div class="kv">' +
-      cmp('Weight avg', w1.weight, cur && cur.weight, ' kg', 1, -1) +
-      cmp('Waist', waist1 ? Number(waist1.waist_cm) : null, waistL && waist1 && waistL.entry_date > waist1.entry_date ? Number(waistL.waist_cm) : null, ' cm', 1, -1) +
-      cmp('Steps', w1.steps, cur && cur.steps, '', 0, 1) +
-      cmp('Sleep', w1.sleep, cur && cur.sleep, ' h', 1, 1) +
-      cmp('Protein', w1.protein, cur && cur.protein, ' g', 0, 1) +
-      lifts.filter((l) => l.h.length).slice(0, 4).map((l) => {
-        const base = l.h.filter((x) => x.date <= dAdd(R90.start, 13))[0];
-        const z = l.h[l.h.length - 1];
-        return base ? cmp(escapeHtml(l.n) + ' e1RM*', base.e, z.date > base.date ? z.e : null, ' kg', 1, 1) : '';
+    html += sec('ASSESSMENT', nextAssess ? 'NEXT ' + nextAssess[0].toUpperCase() + ' · ' + escapeHtml(prettyDate(nextAssess[1]).slice(4).toUpperCase()) : 'COMPLETE');
+    html += '<div class="tk-card"><div class="sub" style="margin-bottom:8px">Current week vs the week-1 baseline (24–30 Nov). Fills in as data arrives.</div><div class="kv">' +
+      cmp('WEIGHT AVG', w1.weight, cur && cur.weight, ' kg', 1, -1) +
+      cmp('WAIST', waist1 ? Number(waist1.waist_cm) : null, waistL && waist1 && waistL.entry_date > waist1.entry_date ? Number(waistL.waist_cm) : null, ' cm', 1, -1) +
+      cmp('STEPS', w1.steps, cur && cur.steps, '', 0, 1) + cmp('SLEEP', w1.sleep, cur && cur.sleep, ' h', 1, 1) + cmp('PROTEIN', w1.protein, cur && cur.protein, ' g', 0, 1) +
+      MAIN_LIFTS.map((n) => ({ n, h: liftHistory(n) })).filter((l) => l.h.length).slice(0, 4).map((l) => {
+        const base = l.h.filter((x) => x.date <= dAdd(R90.start, 13))[0]; const z = l.h[l.h.length - 1];
+        return base ? cmp(escapeHtml(l.n.toUpperCase()) + ' E1RM*', base.e, z.date > base.date ? z.e : null, ' kg', 1, 1) : '';
       }).join('') + '</div></div>';
-    if (tHealth && tHealth.rows && tHealth.rows.length) html += '<p class="hint">“w/s” and hollow dots = from watch/scale (Google Health sync, updated ' + escapeHtml(String(tHealth.updated || '').slice(0, 10)) + '), shown only for days without your own check-in value.</p>';
+    if (tHealth && tHealth.rows && tHealth.rows.length) html += '<p class="hint">W/S and hollow or faded marks = from watch/scale (Google Health sync, updated ' + escapeHtml(String(tHealth.updated || '').slice(0, 10)) + '), used only for days without your own check-in value. Readiness is an estimate from sleep, resting HR and HRV, not a medical check.</p>';
     root.innerHTML = html;
   }
+  function row(k, v, t, cls) { return '<div class="k">' + k + '</div><div class="v ' + (cls || '') + '">' + v + '</div><div class="t">' + t + '</div>'; }
 
   if (sessionStorage.getItem('kairo_pass')) unlock();
 })();
