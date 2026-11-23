@@ -600,7 +600,7 @@
     } else if (k === 'bw' || k === 'sec') {
       lastHtml = 'Bodyweight. Leave weight blank unless you add load.';
     } else {
-      lastHtml = 'No history yet. Pick a weight you can lift for the top of the range with 2–3 reps left.';
+      lastHtml = 'No history yet. Find your load at 3 RIR: a weight you could lift for 3 more reps at the top of the range.';
     }
     // Suggestions only from sensible previous sets
     const sugg = last && !last.sets.some((s) => setLooksWrong(s, ex)) ? last.sets : [];
