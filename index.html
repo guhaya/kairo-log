@@ -168,6 +168,52 @@
     padding: 10px 16px; border-radius: 12px; font-weight: 650; z-index: 40; white-space: nowrap;
   }
   .hidden { display: none !important; }
+  /* v2: clearer set entry */
+  .ex.has-err { border-color: var(--danger); }
+  .ex-head .ex-name { flex: 1; }
+  .ex-tools { display: flex; gap: 6px; flex-wrap: wrap; margin: 2px 0 10px; }
+  .mini {
+    background: var(--surface); border: 1px solid var(--line); color: var(--muted);
+    border-radius: 999px; font-size: 12px; font-weight: 650; padding: 6px 10px; min-height: 30px;
+  }
+  .mini:active { transform: scale(0.97); }
+  .ex-last { font-size: 12.5px; color: var(--muted); margin: -4px 0 8px; }
+  .ex-last b { color: var(--text); font-weight: 650; }
+  .ex-last .warnt { color: var(--warn); font-weight: 650; }
+  .set-head {
+    display: grid; grid-template-columns: 48px 1fr 16px 1fr; gap: 8px;
+    font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted);
+    font-weight: 700; margin-bottom: 4px;
+  }
+  .set-head div:nth-child(2), .set-head div:nth-child(4) { padding-left: 11px; }
+  .set .inp input::placeholder { color: #4a5363; font-style: italic; font-weight: 500; opacity: 1; }
+  .set .inp input { color: #ffffff; font-weight: 750; font-size: 17px; }
+  .set .inp.filled { border-color: #3a4a5c; background: #141b25; }
+  .set .inp.auto input { color: #b9c3d3; }
+  .set .inp.bad { border-color: var(--danger); background: #2a1517; }
+  .set .inp span.u { color: var(--muted); font-size: 11px; font-weight: 700; margin-left: 4px; letter-spacing: 0.02em; white-space: nowrap; }
+  .set.done .n { color: var(--accent); font-size: 15px; }
+  .set .n { white-space: nowrap; }
+  .set.done .inp { border-color: var(--accent-dim); }
+  .set-msg { font-size: 12.5px; margin: -4px 0 8px 56px; line-height: 1.35; }
+  .set-msg.bad { color: var(--danger); }
+  .set-msg.warn { color: var(--warn); }
+  .banner {
+    border-radius: 12px; padding: 10px 12px; margin: 0 0 14px; font-size: 13.5px; line-height: 1.4;
+    border: 1px solid var(--line); background: var(--surface); color: var(--text);
+  }
+  .banner.edit { border-color: var(--warn); background: #2b2412; }
+  .banner.ok { border-color: var(--accent); background: var(--accent-bg); color: #c9f2e5; }
+  .banner.bad { border-color: var(--danger); background: #2a1517; color: #ffd6d6; }
+  .banner button { margin-left: 6px; }
+  .banner ul { margin: 6px 0 0 18px; padding: 0; }
+  .hist-item { display: block; width: 100%; text-align: left; color: var(--text); }
+  .hist-item .row1 { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .hist-item .edit { color: var(--accent); font-size: 13px; font-weight: 650; }
+  .hist-item .sets { color: var(--muted); font-size: 12.5px; margin-top: 6px; line-height: 1.45; }
+  .badge { display: inline-block; font-size: 10.5px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; border-radius: 999px; padding: 2px 7px; margin-left: 6px; }
+  .badge.check { background: #3a2e10; color: var(--warn); border: 1px solid var(--warn); }
+  .dock .status { min-height: 1.2em; }
 </style>
 </head>
 <body>
@@ -207,6 +253,7 @@
       </div>
     </div>
     <p class="hint" id="suggest-hint"></p>
+    <div class="banner hidden" id="form-banner" role="status" aria-live="polite"></div>
 
     <div id="exercises"></div>
 
@@ -242,6 +289,11 @@
     if (location.hostname.endsWith('supabase.co')) {
       return location.pathname.replace(/\/$/, '').split('?')[0];
     }
+    // Local testing only: allow ?api= when the page itself is served from localhost.
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+      const p = new URLSearchParams(location.search).get('api');
+      if (p && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?\//.test(p)) return p;
+    }
     return 'https://evdszcqwdrmsjkxiuwvv.supabase.co/functions/v1/kairo-log';
   })();
 
@@ -252,21 +304,34 @@
   let currentType = 'Push';
   let energyTouched = false;
   let sorenessTouched = false;
-  let lastByExercise = {};
+  let editing = null;        // saved session currently loaded for editing
+  let restoredDraft = false;
+  let savedBanner = null;
 
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  function prettyDate(iso) {
+    if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso || '';
+    const [y, m, d] = iso.split('-').map(Number);
+    const dt = new Date(Date.UTC(y, m - 1, d));
+    return DAYS[dt.getUTCDay()] + ' ' + d + ' ' + MONTHS[m - 1];
+  }
   function todayIST() {
     return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
   }
-
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
   function toast(msg) {
     const t = $('toast');
     t.textContent = msg;
     t.style.display = 'block';
-    setTimeout(() => { t.style.display = 'none'; }, 2200);
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => { t.style.display = 'none'; }, 2600);
   }
 
-  async function api(payload, extraHeaders) {
-    const headers = { 'Content-Type': 'application/json', ...(extraHeaders || {}) };
+  async function api(payload) {
+    const headers = { 'Content-Type': 'application/json' };
     const pass = sessionStorage.getItem('kairo_pass');
     if (pass) headers['x-kairo-passcode'] = pass;
     const res = await fetch(API, { method: 'POST', headers, body: JSON.stringify(payload) });
@@ -281,11 +346,9 @@
     return data;
   }
 
-  function passcode() { return $('passcode').value.trim(); }
-
   async function unlock() {
     $('unlock-err').textContent = '';
-    const code = passcode() || sessionStorage.getItem('kairo_pass') || '';
+    const code = $('passcode').value.trim() || sessionStorage.getItem('kairo_pass') || '';
     if (!code) { $('unlock-err').textContent = 'Enter your passcode.'; return; }
     $('unlock-btn').disabled = true;
     try {
@@ -306,20 +369,165 @@
     plan = data.plan;
     history = data.sessions || [];
     suggested = data.suggested;
-    lastByExercise = data.last_weights || {};
     currentType = (suggested && suggested.type) || 'Push';
     $('session-date').value = (suggested && suggested.date) || todayIST();
-    energyTouched = false;
-    sorenessTouched = false;
-    $('energy').value = 5;
-    $('soreness').value = 5;
-    $('energy-val').textContent = '—';
-    $('soreness-val').textContent = '—';
-    $('energy-val').classList.add('off');
-    $('soreness-val').classList.add('off');
+    openForm();
+  }
+
+  /* ---------- exercise kinds and limits ---------- */
+
+  function kind(ex) {
+    if (ex.unit === 's') return 'sec';
+    if (ex.unit === 'm') return 'dist';
+    if (ex.unit === 'band') return 'band';
+    if (ex.target === 'bodyweight') return 'bw';
+    return 'kg';
+  }
+  function perLabel(ex) { return ex.per ? '/' + ex.per : ''; }
+  function valueUnit(ex) {
+    const k = kind(ex);
+    if (k === 'sec') return 'sec';
+    if (k === 'dist') return 'm';
+    return 'reps' + perLabel(ex);
+  }
+  function valueHeader(ex) {
+    const k = kind(ex);
+    if (k === 'sec') return 'Seconds';
+    if (k === 'dist') return 'Metres';
+    return 'Reps' + (ex.per ? ' per ' + ex.per : '');
+  }
+  function weightHeader(ex) {
+    const k = kind(ex);
+    if (k === 'band') return 'Band / weight';
+    if (k === 'bw' || k === 'sec') return 'Added kg (blank = BW)';
+    if (k === 'dist') return 'kg per hand';
+    return 'Weight (kg)';
+  }
+  function weightUnit(ex) {
+    const k = kind(ex);
+    if (k === 'band') return '';
+    return 'kg';
+  }
+  function limits(ex) {
+    const k = kind(ex);
+    if (k === 'sec') return { min: 1, max: 600, word: 'seconds' };
+    if (k === 'dist') return { min: 1, max: 200, word: 'metres' };
+    return { min: 1, max: 50, word: 'reps' };
+  }
+  function rangeText(ex) {
+    const r = String(ex.rep_range || '').replace(/\s*s$/, '');
+    const k = kind(ex);
+    if (k === 'sec') return r + ' sec';
+    if (k === 'dist') return r + ' m';
+    return r + ' reps' + (ex.per ? ' per ' + ex.per : '');
+  }
+  function defaultWeightFor(ex) {
+    const k = kind(ex);
+    if (k === 'bw' || k === 'sec') return 'BW';
+    if (k === 'band') return String(ex.target || 'light');
+    return '';
+  }
+  function numericTarget(ex) {
+    const t = ex.target;
+    if (t == null || t === '') return null;
+    const n = parseFloat(String(t).replace(',', '.'));
+    return isFinite(n) && /^\s*\d/.test(String(t)) ? String(t) : null;
+  }
+  function parseNum(v) {
+    const s = String(v).trim().replace(',', '.').replace(/\s*kg$/i, '');
+    if (!/^\d+(\.\d+)?$/.test(s)) return null;
+    return parseFloat(s);
+  }
+
+  /* ---------- history lookups ---------- */
+
+  function realSessions() {
+    return (history || []).filter((s) => !s.is_test);
+  }
+  function lastFor(ex, excludeKey) {
+    const names = [ex.log_name, ex.name].filter(Boolean);
+    const before = excludeKey ? excludeKey.split('|')[0] : '';
+    for (const s of realSessions()) {
+      if (before && s.session_date >= before) continue; // only sessions before the one being logged
+      for (const e of s.exercises || []) {
+        if (names.includes(e.name) && (e.sets || []).some((x) => (x.reps || '').trim() || parseNum(x.weight || '') != null)) {
+          return { date: s.session_date, sets: e.sets };
+        }
+      }
+    }
+    return null;
+  }
+  function setLooksWrong(set, ex) {
+    const r = String(set.reps || '').trim();
+    if (!r) return true;
+    const n = Number(r);
+    const lim = ex ? limits(ex) : { min: 1, max: 50 };
+    if (!/^\d+$/.test(r) || n < lim.min || n > lim.max) return true;
+    const w = parseNum(set.weight || '');
+    if (w != null && w > 400) return true;
+    return false;
+  }
+  function fmtSet(set, ex) {
+    const w = String(set.weight || '').trim();
+    const r = String(set.reps || '').trim();
+    const k = kind(ex);
+    const wTxt = parseNum(w) != null ? w + ' kg' : (w || (k === 'kg' ? '?' : 'BW'));
+    const unit = k === 'sec' ? ' s' : k === 'dist' ? ' m' : '';
+    return wTxt + ' × ' + (r || '?') + unit;
+  }
+  function planExerciseByName(name) {
+    if (!plan) return null;
+    for (const t of Object.keys(plan.sessions)) {
+      for (const ex of plan.sessions[t].exercises) {
+        if (ex.log_name === name || ex.name === name) return ex;
+      }
+    }
+    return null;
+  }
+  function sessionIssues(s) {
+    let n = 0;
+    for (const e of s.exercises || []) {
+      const ex = planExerciseByName(e.name) || { unit: e.unit };
+      for (const set of e.sets || []) if (setLooksWrong(set, ex)) n++;
+    }
+    return n;
+  }
+  function savedSession(date, type) {
+    return realSessions().find((s) => s.session_date === date && s.session_type === type) || null;
+  }
+
+  /* ---------- rendering ---------- */
+
+  function openForm(opts) {
+    opts = opts || {};
+    energyTouched = false; sorenessTouched = false;
+    $('energy').value = 5; $('soreness').value = 5;
+    setSlider('energy', null); setSlider('soreness', null);
     $('session-notes').value = '';
+    editing = null;
+    restoredDraft = false;
     render();
-    restoreDraft();
+    const date = $('session-date').value;
+    const saved = savedSession(date, currentType);
+    if (opts.fromHistory && saved) {
+      clearDraft();
+      fillFrom(saved);
+      editing = saved;
+    } else if (restoreDraft()) {
+      restoredDraft = true;
+      if (saved) editing = saved;
+    } else if (saved) {
+      fillFrom(saved);
+      editing = saved;
+    }
+    refreshAll();
+    renderBanner();
+  }
+
+  function setSlider(id, v) {
+    const val = $(id + '-val');
+    if (v == null) { val.textContent = '—'; val.classList.add('off'); return; }
+    $(id).value = v; val.textContent = v; val.classList.remove('off');
   }
 
   function render() {
@@ -328,160 +536,391 @@
       b.classList.toggle('suggested', !!(suggested && suggested.type === b.dataset.type));
     });
     const sess = plan.sessions[currentType];
-    const why = suggested && suggested.type === currentType
-      ? suggested.reason
-      : (sess ? ('Default ' + sess.default_day) : '');
+    const why = suggested && suggested.type === currentType ? suggested.reason : (sess ? ('Default ' + sess.default_day) : '');
     $('suggest-hint').innerHTML = sess
-      ? '<strong>' + currentType + '</strong> · ' + sess.subtitle + (why ? ' · ' + why : '')
+      ? '<strong>' + currentType + '</strong> · ' + escapeHtml(sess.subtitle) + (why ? ' · ' + escapeHtml(why) : '')
       : '';
     const root = $('exercises');
     root.innerHTML = '';
-    (sess ? sess.exercises : []).forEach((ex, i) => root.appendChild(exerciseCard(ex, i)));
+    const key = $('session-date').value + '|' + currentType;
+    (sess ? sess.exercises : []).forEach((ex, i) => root.appendChild(exerciseCard(ex, i, key)));
     renderHistory();
   }
 
-  function unitLabel(ex) {
-    if (ex.unit === 's') return 'sec';
-    if (ex.unit === 'm') return 'm';
-    if (ex.unit === 'band') return '';
-    return 'kg';
-  }
-  function weightLabel(ex) {
-    if (ex.unit === 's' || ex.target === 'bodyweight') return '';
-    if (ex.unit === 'band') return '';
-    return 'kg';
-  }
-  function weightPlaceholder(ex) {
-    if (ex.target === 'bodyweight' || ex.unit === 's') return 'BW';
-    if (ex.target === 'light' || ex.unit === 'band') return 'light';
-    if (ex.target) return String(ex.target);
-    const last = lastByExercise[ex.log_name] || lastByExercise[ex.name];
-    return last ? String(last) : 'wt';
-  }
-  function repsPlaceholder(ex) {
-    if (ex.unit === 's') return 'sec';
-    if (ex.unit === 'm') return 'm';
-    if (ex.per) return ex.rep_range + '/' + ex.per;
-    return ex.rep_range;
-  }
-  function defaultWeight(ex) {
-    // Only prefill non-numeric prescribed values from the plan, or the lifter's own last weight.
-    // Never invent a kilogram target.
-    if (ex.target === 'bodyweight' || ex.unit === 's') return 'BW';
-    if (ex.target === 'light' || ex.unit === 'band') return 'light';
-    const last = lastByExercise[ex.log_name] || lastByExercise[ex.name];
-    if (last) return String(last);
-    if (ex.target && !isNaN(parseFloat(ex.target))) return String(ex.target);
-    return '';
-  }
-
-  function exerciseCard(ex, idx) {
+  function exerciseCard(ex, idx, key) {
     const el = document.createElement('article');
     el.className = 'ex';
     el.dataset.idx = idx;
-    const range = ex.per ? (ex.sets + ' × ' + ex.rep_range + ' per ' + ex.per) : (ex.sets + ' × ' + ex.rep_range);
-    const tgt = ex.target == null || ex.target === '' ? '—' : String(ex.target);
-    let setsHtml = '';
-    for (let s = 1; s <= ex.sets; s++) {
-      setsHtml += '<div class="set">' +
-        '<div class="n">SET ' + s + '</div>' +
-        '<div class="inp"><input data-f="w" data-s="' + s + '" inputmode="decimal" enterkeyhint="next" placeholder="' + weightPlaceholder(ex) + '" autocomplete="off"><span>' + weightLabel(ex) + '</span></div>' +
-        '<div class="times">×</div>' +
-        '<div class="inp"><input data-f="r" data-s="' + s + '" inputmode="decimal" enterkeyhint="next" placeholder="' + repsPlaceholder(ex) + '" autocomplete="off"><span>' + unitLabel(ex) + '</span></div>' +
-        '</div>';
+    const k = kind(ex);
+    const last = lastFor(ex, key);
+    const tgt = numericTarget(ex);
+    let lastHtml;
+    if (tgt) {
+      lastHtml = 'Target: <b>' + escapeHtml(tgt) + ' kg</b>';
+      if (last) lastHtml += ' · Last ' + escapeHtml(prettyDate(last.date)) + ': ' + escapeHtml(last.sets.map((s) => fmtSet(s, ex)).join(', '));
+    } else if (last) {
+      const bad = last.sets.some((s) => setLooksWrong(s, ex));
+      lastHtml = 'Last ' + escapeHtml(prettyDate(last.date)) + ': <b>' + escapeHtml(last.sets.map((s) => fmtSet(s, ex)).join(', ')) + '</b>' +
+        (bad ? ' <span class="warnt">· looks wrong, fix in history</span>' : '');
+    } else if (k === 'band') {
+      lastHtml = 'Light band or plate. Add reps before weight.';
+    } else if (k === 'bw' || k === 'sec') {
+      lastHtml = 'Bodyweight. Leave weight blank unless you add load.';
+    } else {
+      lastHtml = 'No history yet. Pick a weight you can lift for the top of the range with 2–3 reps left.';
     }
+    // Suggestions only from sensible previous sets
+    const sugg = last && !last.sets.some((s) => setLooksWrong(s, ex)) ? last.sets : [];
+    let setsHtml = '<div class="set-head"><div></div><div>' + escapeHtml(weightHeader(ex)) + '</div><div></div><div>' + escapeHtml(valueHeader(ex)) + '</div></div>';
+    const lim = limits(ex);
+    for (let s = 1; s <= ex.sets; s++) {
+      const sg = sugg[s - 1] || sugg[sugg.length - 1];
+      const wPh = sg && parseNum(sg.weight || '') != null ? String(sg.weight) : (k === 'band' ? String(ex.target || 'light') : (k === 'bw' || k === 'sec') ? 'BW' : '–');
+      const rPh = sg && sg.reps ? String(sg.reps) : rangeText(ex).replace(' reps', '').replace(' per ', '/');
+      const wMode = k === 'band' ? 'inputmode="text" autocapitalize="off"' : 'inputmode="decimal"';
+      setsHtml += '<div class="set" data-s="' + s + '">' +
+        '<div class="n">SET ' + s + '</div>' +
+        '<div class="inp"><input data-f="w" data-s="' + s + '" ' + wMode + ' enterkeyhint="next" placeholder="' + escapeHtml(wPh) + '" autocomplete="off" aria-label="Set ' + s + ' ' + escapeHtml(weightHeader(ex)) + '"><span class="u">' + weightUnit(ex) + '</span></div>' +
+        '<div class="times">×</div>' +
+        '<div class="inp"><input data-f="r" data-s="' + s + '" inputmode="numeric" pattern="[0-9]*" enterkeyhint="next" placeholder="' + escapeHtml(rPh) + '" autocomplete="off" aria-label="Set ' + s + ' ' + escapeHtml(valueHeader(ex)) + ' (' + lim.min + '–' + lim.max + ')"><span class="u">' + escapeHtml(valueUnit(ex)) + '</span></div>' +
+        '</div><div class="set-msg" data-msg="' + s + '"></div>';
+    }
+    const range = ex.sets + ' sets × ' + rangeText(ex) + ' · rest ' + ex.rest;
     el.innerHTML =
       '<div class="ex-head"><div class="ex-name">' + escapeHtml(ex.name) + '</div></div>' +
-      '<div class="ex-meta">' + range + ' · rest ' + escapeHtml(ex.rest) + ' · target <span class="tgt">' + escapeHtml(tgt) + '</span></div>' +
+      '<div class="ex-meta">' + escapeHtml(range) + '</div>' +
+      '<div class="ex-last">' + lastHtml + '</div>' +
+      '<div class="ex-tools">' +
+        (sugg.length ? '<button type="button" class="mini" data-act="last">Use last</button>' : '') +
+        (ex.sets > 1 ? '<button type="button" class="mini" data-act="copy">Copy set 1 to all</button>' : '') +
+        '<button type="button" class="mini" data-act="clear">Clear</button>' +
+      '</div>' +
       setsHtml +
       '<textarea class="ex-notes" placeholder="Notes (optional)" rows="1"></textarea>';
-    // Prefill weight only (not reps)
-    const dw = defaultWeight(ex);
-    if (dw) {
-      el.querySelectorAll('input[data-f="w"]').forEach((inp) => { inp.value = dw; });
-    }
-    el.querySelectorAll('input, textarea').forEach((n) => n.addEventListener('input', saveDraft));
+
+    el.addEventListener('input', (e) => {
+      const t = e.target;
+      if (t.dataset && t.dataset.f) {
+        t.parentElement.classList.remove('auto');
+        t.dataset.auto = '';
+        if (t.dataset.f === 'w') autoFillDown(el, Number(t.dataset.s));
+      }
+      dirty();
+      refreshCard(el, ex);
+    });
+    el.querySelectorAll('[data-act]').forEach((b) => b.addEventListener('click', () => {
+      const act = b.dataset.act;
+      const ws = [...el.querySelectorAll('input[data-f="w"]')];
+      const rs = [...el.querySelectorAll('input[data-f="r"]')];
+      if (act === 'copy') {
+        for (let i = 1; i < ws.length; i++) { ws[i].value = ws[0].value; rs[i].value = rs[0].value; ws[i].dataset.auto = ''; ws[i].parentElement.classList.remove('auto'); }
+      } else if (act === 'last') {
+        for (let i = 0; i < ws.length; i++) {
+          const sg = sugg[i] || sugg[sugg.length - 1];
+          if (!sg) continue;
+          ws[i].value = sg.weight && parseNum(sg.weight) != null ? sg.weight : (k === 'kg' ? '' : '');
+          rs[i].value = sg.reps || '';
+          ws[i].dataset.auto = '';
+          ws[i].parentElement.classList.remove('auto');
+        }
+      } else if (act === 'clear') {
+        ws.concat(rs).forEach((n) => { n.value = ''; n.dataset.auto = ''; n.parentElement.classList.remove('auto'); });
+      }
+      dirty();
+      refreshCard(el, ex);
+    }));
+    el.querySelector('.ex-notes').addEventListener('input', dirty);
     return el;
   }
 
-  function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function autoFillDown(card, fromSet) {
+    const ws = [...card.querySelectorAll('input[data-f="w"]')];
+    const src = ws[fromSet - 1];
+    for (let i = fromSet; i < ws.length; i++) {
+      const w = ws[i];
+      if (w.value.trim() && w.dataset.auto !== '1') break; // never overwrite typed values
+      w.value = src.value;
+      w.dataset.auto = src.value ? '1' : '';
+      w.parentElement.classList.toggle('auto', !!src.value);
+    }
   }
+
+  /* ---------- validation ---------- */
+
+  function checkSet(ex, wRaw, rRaw, wAuto) {
+    const k = kind(ex);
+    const w = String(wRaw || '').trim();
+    const r = String(rRaw || '').trim();
+    const lim = limits(ex);
+    const out = { state: 'empty', msg: '', bad: false, wBad: false, rBad: false };
+    if (!w && !r) return out;
+    if (!r && wAuto) return out; // auto-filled weight on an unused set is ignored
+    if (r) {
+      if (!/^\d+$/.test(r)) { out.rBad = true; out.msg = lim.word[0].toUpperCase() + lim.word.slice(1) + ' must be a whole number.'; }
+      else {
+        const n = Number(r);
+        if (n < lim.min || n > lim.max) {
+          out.rBad = true;
+          out.msg = n + ' ' + lim.word + '? Must be ' + lim.min + '–' + lim.max + '.' + (k !== 'sec' && k !== 'dist' && n > lim.max ? ' Did you swap kg and reps?' : '');
+        }
+      }
+    } else {
+      out.rBad = true;
+      out.msg = 'Add the ' + lim.word + ' for this set, or clear the weight.';
+    }
+    if (w && k !== 'band') {
+      const upper = w.toUpperCase();
+      const num = parseNum(w);
+      if (upper === 'BW' && k !== 'kg' && k !== 'dist') { /* ok */ }
+      else if (num == null) { out.wBad = true; out.msg = (out.msg ? out.msg + ' ' : '') + 'Weight must be a number in kg, e.g. 40 or 22.5.'; }
+      else if (num > 400) { out.wBad = true; out.msg = (out.msg ? out.msg + ' ' : '') + num + ' kg? Must be 0–400.'; }
+      else if (num > 0 && r && /^\d+$/.test(r) && Number(r) > 0 && num < 1 && k === 'kg') { /* tiny weights allowed */ }
+    } else if (w && k === 'band' && w.length > 20) {
+      out.wBad = true; out.msg = (out.msg ? out.msg + ' ' : '') + 'Keep the band note short (e.g. light, red, 5 kg).';
+    }
+    out.bad = out.wBad || out.rBad;
+    if (!out.bad && !w && (k === 'kg' || k === 'dist')) {
+      out.warn = 'No weight entered. Add the kg so I can track progress.';
+    }
+    if (!out.bad && k === 'kg' && r && Number(r) > 0 && parseNum(w) != null && Number(r) > 30) {
+      out.warn = Number(r) + ' reps is a lot for this rep range. Check it.';
+    }
+    out.state = out.bad ? 'bad' : 'done';
+    return out;
+  }
+
+  function refreshCard(card, ex) {
+    if (!ex) ex = plan.sessions[currentType].exercises[Number(card.dataset.idx)];
+    let anyBad = false;
+    for (let s = 1; s <= ex.sets; s++) {
+      const w = card.querySelector('input[data-f="w"][data-s="' + s + '"]');
+      const r = card.querySelector('input[data-f="r"][data-s="' + s + '"]');
+      const row = card.querySelector('.set[data-s="' + s + '"]');
+      const msg = card.querySelector('[data-msg="' + s + '"]');
+      const c = checkSet(ex, w.value, r.value, w.dataset.auto === '1');
+      w.parentElement.classList.toggle('filled', !!w.value.trim());
+      r.parentElement.classList.toggle('filled', !!r.value.trim());
+      w.parentElement.classList.toggle('bad', c.wBad);
+      r.parentElement.classList.toggle('bad', c.rBad);
+      row.classList.toggle('done', c.state === 'done');
+      row.querySelector('.n').textContent = (c.state === 'done' ? '✓ ' : 'SET ') + s;
+      msg.textContent = c.msg || c.warn || '';
+      msg.className = 'set-msg' + (c.msg ? ' bad' : c.warn ? ' warn' : '');
+      if (c.bad) anyBad = true;
+    }
+    card.classList.toggle('has-err', anyBad);
+    return anyBad;
+  }
+  function refreshAll() {
+    document.querySelectorAll('#exercises .ex').forEach((c) => refreshCard(c));
+  }
+
+  /* ---------- collect / fill ---------- */
 
   function collect() {
     const sess = plan.sessions[currentType];
     const cards = [...document.querySelectorAll('#exercises .ex')];
+    const problems = [];
     const exercises = sess.exercises.map((ex, i) => {
       const card = cards[i];
       const sets = [];
       for (let s = 1; s <= ex.sets; s++) {
-        const w = card.querySelector('input[data-f="w"][data-s="' + s + '"]');
-        const r = card.querySelector('input[data-f="r"][data-s="' + s + '"]');
-        const weight = (w && w.value || '').trim();
-        const reps = (r && r.value || '').trim();
-        if (weight || reps) sets.push({ weight, reps });
+        const wi = card.querySelector('input[data-f="w"][data-s="' + s + '"]');
+        const ri = card.querySelector('input[data-f="r"][data-s="' + s + '"]');
+        let weight = (wi.value || '').trim().replace(',', '.').replace(/\s*kg$/i, '');
+        const reps = (ri.value || '').trim();
+        const c = checkSet(ex, weight, reps, wi.dataset.auto === '1');
+        if (c.state === 'empty') continue;
+        if (c.bad) problems.push({ card, text: ex.name + ' · set ' + s + ': ' + c.msg });
+        if (!weight) weight = defaultWeightFor(ex);
+        if (/^bw$/i.test(weight)) weight = 'BW';
+        sets.push({ weight, reps });
       }
       const notes = (card.querySelector('.ex-notes').value || '').trim();
       return { name: ex.log_name || ex.name, unit: ex.unit || 'kg', per: ex.per || null, sets, notes };
     });
     return {
-      action: 'save',
-      session_date: $('session-date').value,
-      session_type: currentType,
-      exercises,
-      energy: energyTouched ? Number($('energy').value) : null,
-      soreness: sorenessTouched ? Number($('soreness').value) : null,
-      notes: $('session-notes').value.trim(),
+      payload: {
+        action: 'save',
+        session_date: $('session-date').value,
+        session_type: currentType,
+        exercises,
+        energy: energyTouched ? Number($('energy').value) : null,
+        soreness: sorenessTouched ? Number($('soreness').value) : null,
+        notes: $('session-notes').value.trim(),
+      },
+      problems,
     };
   }
 
-  function draftKey() {
-    return 'kairo_draft_' + currentType + '_' + ($('session-date').value || '');
-  }
-  function saveDraft() {
-    try { localStorage.setItem(draftKey(), JSON.stringify(collect())); } catch (e) {}
-  }
-  function restoreDraft() {
-    let raw;
-    try { raw = localStorage.getItem(draftKey()); } catch (e) { return; }
-    if (!raw) return;
-    let d;
-    try { d = JSON.parse(raw); } catch { return; }
-    if (!d || d.session_type !== currentType) return;
+  function fillFrom(s) {
+    const sess = plan.sessions[currentType];
     const cards = [...document.querySelectorAll('#exercises .ex')];
-    (d.exercises || []).forEach((ex, i) => {
+    sess.exercises.forEach((ex, i) => {
+      const saved = (s.exercises || []).find((e) => e.name === (ex.log_name || ex.name) || e.name === ex.name);
       const card = cards[i];
-      if (!card) return;
-      (ex.sets || []).forEach((set, si) => {
+      if (!saved || !card) return;
+      (saved.sets || []).forEach((set, si) => {
         const w = card.querySelector('input[data-f="w"][data-s="' + (si + 1) + '"]');
         const r = card.querySelector('input[data-f="r"][data-s="' + (si + 1) + '"]');
-        if (w && set.weight != null) w.value = set.weight;
-        if (r && set.reps != null) r.value = set.reps;
+        if (!w || !r) return;
+        const wv = String(set.weight || '');
+        // Don't show the old automatic "light"/"BW" fill-ins as typed values when no reps were entered.
+        w.value = (!set.reps && (wv === 'light' || wv === 'BW')) ? '' : wv;
+        r.value = set.reps || '';
       });
-      if (ex.notes) card.querySelector('.ex-notes').value = ex.notes;
+      if (saved.notes) card.querySelector('.ex-notes').value = saved.notes;
     });
-    if (d.energy != null) { energyTouched = true; $('energy').value = d.energy; $('energy-val').textContent = d.energy; $('energy-val').classList.remove('off'); }
-    if (d.soreness != null) { sorenessTouched = true; $('soreness').value = d.soreness; $('soreness-val').textContent = d.soreness; $('soreness-val').classList.remove('off'); }
-    if (d.notes) $('session-notes').value = d.notes;
+    if (s.energy != null) { energyTouched = true; setSlider('energy', s.energy); }
+    if (s.soreness != null) { sorenessTouched = true; setSlider('soreness', s.soreness); }
+    $('session-notes').value = s.notes || '';
   }
 
+  /* ---------- drafts ---------- */
+
+  function draftKey() { return 'kairo_draft2_' + currentType + '_' + ($('session-date').value || ''); }
+  function oldDraftKey() { return 'kairo_draft_' + currentType + '_' + ($('session-date').value || ''); }
+  function grid() {
+    return [...document.querySelectorAll('#exercises .ex')].map((card) => ({
+      sets: [...card.querySelectorAll('input[data-f="w"]')].map((w, i) => {
+        const r = card.querySelectorAll('input[data-f="r"]')[i];
+        return [w.value, r.value, w.dataset.auto === '1' ? 1 : 0];
+      }),
+      notes: card.querySelector('.ex-notes').value,
+    }));
+  }
+  function saveDraft() {
+    try {
+      localStorage.setItem(draftKey(), JSON.stringify({
+        v: 2, type: currentType, grid: grid(),
+        energy: energyTouched ? Number($('energy').value) : null,
+        soreness: sorenessTouched ? Number($('soreness').value) : null,
+        notes: $('session-notes').value, at: Date.now(),
+      }));
+    } catch (e) {}
+  }
+  function clearDraft() {
+    try { localStorage.removeItem(draftKey()); localStorage.removeItem(oldDraftKey()); } catch (e) {}
+  }
+  function restoreDraft() {
+    let d = null;
+    try { d = JSON.parse(localStorage.getItem(draftKey()) || 'null'); } catch (e) { d = null; }
+    const cards = [...document.querySelectorAll('#exercises .ex')];
+    let any = false;
+    if (d && d.v === 2 && d.type === currentType) {
+      (d.grid || []).forEach((g, i) => {
+        const card = cards[i]; if (!card) return;
+        (g.sets || []).forEach(([wv, rv, auto], si) => {
+          const w = card.querySelector('input[data-f="w"][data-s="' + (si + 1) + '"]');
+          const r = card.querySelector('input[data-f="r"][data-s="' + (si + 1) + '"]');
+          if (!w || !r) return;
+          w.value = wv || ''; r.value = rv || '';
+          if (auto) { w.dataset.auto = '1'; w.parentElement.classList.add('auto'); }
+          if (rv) any = true; else if (wv && !auto) any = true;
+        });
+        if (g.notes) { card.querySelector('.ex-notes').value = g.notes; any = true; }
+      });
+    } else {
+      // Old-format draft: only real reps count; old auto-prefilled weights are dropped.
+      let o = null;
+      try { o = JSON.parse(localStorage.getItem(oldDraftKey()) || 'null'); } catch (e) { o = null; }
+      if (o && o.session_type === currentType) {
+        (o.exercises || []).forEach((ex, i) => {
+          const card = cards[i]; if (!card) return;
+          (ex.sets || []).forEach((set, si) => {
+            if (!set.reps) return;
+            const w = card.querySelector('input[data-f="w"][data-s="' + (si + 1) + '"]');
+            const r = card.querySelector('input[data-f="r"][data-s="' + (si + 1) + '"]');
+            if (!w || !r) return;
+            w.value = set.weight || ''; r.value = set.reps; any = true;
+          });
+        });
+        d = o;
+      }
+    }
+    if (!d) return false;
+    if (d.energy != null) { energyTouched = true; setSlider('energy', d.energy); any = true; }
+    if (d.soreness != null) { sorenessTouched = true; setSlider('soreness', d.soreness); any = true; }
+    if (d.notes) { $('session-notes').value = d.notes; any = true; }
+    return any;
+  }
+
+  /* ---------- banners ---------- */
+
+  function renderBanner(extra) {
+    const b = $('form-banner');
+    const date = $('session-date').value;
+    let html = '', cls = '';
+    if (extra) { html = extra.html; cls = extra.cls; }
+    else if (savedBanner) { html = savedBanner; cls = 'ok'; }
+    else if (editing) {
+      cls = 'edit';
+      html = '<b>Editing ' + escapeHtml(currentType) + ' · ' + escapeHtml(prettyDate(date)) + '</b> (already saved). Saving will replace it.' +
+        (restoredDraft ? ' Unsaved changes restored from this phone. <button type="button" class="mini" data-b="reload">Discard changes</button>' : '') +
+        ' <button type="button" class="mini" data-b="new">Start fresh</button>';
+    } else if (restoredDraft) {
+      cls = '';
+      html = 'Unsaved draft restored from this phone. <button type="button" class="mini" data-b="discard">Discard draft</button>';
+    }
+    b.className = 'banner' + (cls ? ' ' + cls : '') + (html ? '' : ' hidden');
+    b.innerHTML = html;
+    b.querySelectorAll('[data-b]').forEach((btn) => btn.addEventListener('click', () => {
+      const a = btn.dataset.b;
+      clearDraft();
+      if (a === 'reload') { openForm({ fromHistory: true }); return; }
+      if (a === 'new' || a === 'discard') {
+        restoredDraft = false; editing = a === 'new' ? null : editing;
+        render(); refreshAll();
+        if (a === 'discard' && editing) fillFrom(editing);
+        energyTouched = false; sorenessTouched = false; setSlider('energy', null); setSlider('soreness', null);
+        if (a === 'new') { $('session-notes').value = ''; editing = null; }
+        refreshAll(); renderBanner();
+      }
+    }));
+  }
+
+  function dirty() {
+    if (savedBanner) { savedBanner = null; renderBanner(); }
+    setStatus('');
+    saveDraft();
+  }
+
+  /* ---------- save ---------- */
+
   async function save() {
-    const payload = collect();
-    const hasAny = payload.exercises.some((ex) => ex.sets.length);
+    const { payload, problems } = collect();
+    const nSets = payload.exercises.reduce((a, e) => a + e.sets.length, 0);
+    const nEx = payload.exercises.filter((e) => e.sets.length).length;
     if (!payload.session_date) { setStatus('Pick a date first.', true); return; }
-    if (!hasAny) { setStatus('Enter at least one set before saving.', true); return; }
+    if (payload.session_date > todayIST()) { setStatus('That date is in the future. Pick today or an earlier day.', true); return; }
+    if (problems.length) {
+      renderBanner({ cls: 'bad', html: '<b>Not saved. Fix ' + problems.length + (problems.length === 1 ? ' problem' : ' problems') + ':</b><ul>' +
+        problems.slice(0, 6).map((p) => '<li>' + escapeHtml(p.text) + '</li>').join('') + '</ul>' });
+      setStatus('Not saved — fix the red boxes.', true);
+      problems[0].card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    if (!nSets) { setStatus('Enter at least one set before saving.', true); return; }
+    const replacing = !!savedSession(payload.session_date, payload.session_type);
     $('save-btn').disabled = true;
     setStatus('Saving…');
     try {
       const res = await api(payload);
-      try { localStorage.removeItem(draftKey()); } catch (e) {}
-      setStatus('Saved. ' + (res.message || 'The morning check-in will pick this up.'), false, true);
-      toast('Session saved');
+      clearDraft();
       history = res.sessions || history;
       if (res.suggested) suggested = res.suggested;
+      editing = savedSession(payload.session_date, payload.session_type);
+      restoredDraft = false;
+      savedBanner = '✓ <b>' + (replacing ? 'Updated' : 'Saved') + ' ' + escapeHtml(payload.session_type) + ' · ' + escapeHtml(prettyDate(payload.session_date)) + '</b> — ' +
+        nEx + (nEx === 1 ? ' exercise, ' : ' exercises, ') + nSets + (nSets === 1 ? ' set' : ' sets') + '. The morning check-in will sync it.';
+      renderBanner();
       renderHistory();
+      setStatus('✓ Saved at ' + new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' }) + ' IST', false, true);
+      toast(replacing ? 'Session updated ✓' : 'Session saved ✓');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (e) {
-      setStatus(e.message || 'Save failed.', true);
+      setStatus('Not saved: ' + (e.message || 'Save failed.') + (e.status === 401 ? ' Lock and re-enter your passcode.' : ''), true);
+      renderBanner({ cls: 'bad', html: '<b>Not saved.</b> ' + escapeHtml(e.message || 'Save failed.') + ' Your entries are kept on this phone; try again.' });
     } finally {
       $('save-btn').disabled = false;
     }
@@ -495,31 +934,47 @@
 
   function renderHistory() {
     const root = $('history');
-    const items = (history || []).filter((s) => !s.is_test);
+    const items = realSessions();
     if (!items.length) { root.innerHTML = ''; return; }
-    root.innerHTML = '<h3>Recent sessions</h3>' + items.slice(0, 8).map((s) => {
-      const n = (s.exercise_count != null) ? s.exercise_count : ((s.exercises || []).filter((e) => e.sets && e.sets.length).length);
-      return '<div class="hist-item"><div class="when">' + escapeHtml(s.session_date) + ' · ' + escapeHtml(s.session_type) + '</div>' +
-        '<div class="sum">' + n + ' exercises logged' + (s.energy ? ' · energy ' + s.energy : '') + '</div></div>';
-    }).join('');
+    root.innerHTML = '<h3>Saved sessions · tap to view or fix</h3>' + items.slice(0, 12).map((s, i) => {
+      const exs = (s.exercises || []).filter((e) => e.sets && e.sets.length);
+      const issues = sessionIssues(s);
+      const lines = exs.slice(0, 4).map((e) => {
+        const pe = planExerciseByName(e.name) || { unit: e.unit };
+        return escapeHtml(e.name) + ': ' + escapeHtml(e.sets.map((x) => fmtSet(x, pe)).join(', '));
+      }).join('<br>') + (exs.length > 4 ? '<br>+' + (exs.length - 4) + ' more' : '');
+      return '<button type="button" class="hist-item" data-h="' + i + '">' +
+        '<div class="row1"><div class="when">' + escapeHtml(prettyDate(s.session_date)) + ' · ' + escapeHtml(s.session_type) +
+        (issues ? '<span class="badge check">Check ' + issues + '</span>' : '') + '</div><div class="edit">Edit ›</div></div>' +
+        '<div class="sum">' + exs.length + (exs.length === 1 ? ' exercise' : ' exercises') + (s.energy ? ' · energy ' + s.energy : '') + (s.soreness ? ' · soreness ' + s.soreness : '') + '</div>' +
+        (lines ? '<div class="sets">' + lines + '</div>' : '') +
+        '</button>';
+    }).join('') + '<p class="hint" style="margin-top:10px">Missed a session? Pick its date and type above, enter the sets and save.</p>';
+    root.querySelectorAll('[data-h]').forEach((btn) => btn.addEventListener('click', () => {
+      const s = items[Number(btn.dataset.h)];
+      saveDraft();
+      currentType = s.session_type;
+      $('session-date').value = s.session_date;
+      savedBanner = null;
+      openForm({ fromHistory: true });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }));
   }
 
   document.querySelectorAll('#seg button').forEach((b) => {
     b.addEventListener('click', () => {
+      if (b.dataset.type === currentType) return;
       saveDraft();
       currentType = b.dataset.type;
-      energyTouched = false; sorenessTouched = false;
-      $('energy-val').textContent = '—'; $('soreness-val').textContent = '—';
-      $('energy-val').classList.add('off'); $('soreness-val').classList.add('off');
-      $('session-notes').value = '';
-      render();
-      restoreDraft();
+      savedBanner = null; setStatus('');
+      openForm();
     });
   });
-  $('session-date').addEventListener('change', () => { render(); restoreDraft(); saveDraft(); });
-  $('energy').addEventListener('input', () => { energyTouched = true; $('energy-val').textContent = $('energy').value; $('energy-val').classList.remove('off'); saveDraft(); });
-  $('soreness').addEventListener('input', () => { sorenessTouched = true; $('soreness-val').textContent = $('soreness').value; $('soreness-val').classList.remove('off'); saveDraft(); });
-  $('session-notes').addEventListener('input', saveDraft);
+  $('session-date').addEventListener('focus', () => saveDraft());
+  $('session-date').addEventListener('change', () => { savedBanner = null; setStatus(''); openForm(); });
+  $('energy').addEventListener('input', () => { energyTouched = true; setSlider('energy', $('energy').value); dirty(); });
+  $('soreness').addEventListener('input', () => { sorenessTouched = true; setSlider('soreness', $('soreness').value); dirty(); });
+  $('session-notes').addEventListener('input', dirty);
   $('unlock-btn').addEventListener('click', unlock);
   $('passcode').addEventListener('keydown', (e) => { if (e.key === 'Enter') unlock(); });
   $('save-btn').addEventListener('click', save);
@@ -530,9 +985,7 @@
     $('unlock').classList.remove('hidden');
   });
 
-  if (sessionStorage.getItem('kairo_pass')) {
-    unlock();
-  }
+  if (sessionStorage.getItem('kairo_pass')) unlock();
 })();
 </script>
 </body>
